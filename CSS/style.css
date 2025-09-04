@@ -1,0 +1,75 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Espaçamento para o conteúdo principal não ficar por baixo do header fixo */
+body {
+    padding-top: 120px;
+}
+
+/*cabeçalho (header)*/
+
+header {
+    background-color: #0C296C;
+    color: white;
+    height: 70px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+header > div {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+    align-items: center;
+    /* Remova o padding-left daqui para a logo colar na borda */
+    padding-right: 20px; /* Mantém o espaçamento à direita se necessário */
+}
+
+.header-logo {
+    height: 60px;
+    object-fit: contain;
+    /* Remova o padding-left daqui também */
+    margin: 0;
+    padding: 0;
+}
+
+.header-title {
+    flex-grow: 1;
+    text-align: center;
+}
+
+/*caixa de impotação (import box*/
+
+.import-box {
+    padding: 20px 10px;
+    margin-top: 1%
+}
+
+
+/*botões de salvar e limpar*/
+
+#saveBtn .fas.fa-save {
+    color: #0C296C; /* Cor azul do cabeçalho para o ícone de disquete */
+}
+
+/* Opcional: Se você quiser que o botão de salvar seja transparente */
+#saveBtn {
+    background-color: transparent;
+    border: 1px solid #0C296C; /* Borda azul para o botão */
+}
+#saveBtn:hover {
+    background-color: #0C296C;
+    color: white; /* Cor do texto/ícone branca no hover */
+}
+#saveBtn:hover .fas.fa-save {
+    color: white; /* Garante que o ícone fique branco no hover */
+}

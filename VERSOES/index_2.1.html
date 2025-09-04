@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão à Vista APA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+/* ==================== Estilos do Cabeçalho ==================== */
+header {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #0C296C;
+    color: white;
+    z-index: 1000;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+}
+
+header .navbar-brand {
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+}
+
+header img {
+    height: 60px;
+    width: auto;
+}
+
+.header-title {
+    margin: 0;
+    font-size: 40px;
+    font-family: 'Montserrat', sans-serif;
+    flex-grow: 1;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+}
+
+.navbar-toggler {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin-left: auto;
+}
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+.navbar-collapse {
+    position: absolute;
+    top: 80px;
+    right: 0;
+    background-color: #0C296C;
+    width: 200px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    border-radius: 0 0 8px 8px;
+    padding: 10px;
+}
+
+.navbar-collapse.show {
+    display: block;
+}
+
+.navbar-nav .nav-item {
+    text-align: left;
+}
+
+.navbar-nav .nav-link {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
+    padding: 8px 15px;
+    color: white;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: #004d80;
+    color: white;
+}
+
+/* Estilo para o dropdown */
+.dropdown-menu {
+    background-color: #0C296C;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.dropdown-item {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
+    padding: 8px 15px;
+    color: white;
+}
+
+.dropdown-item:hover {
+    background-color: #004d80;
+    color: white;
+}
+
+/* Estilo para a caixa de importação */
+.import-box {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 100px 20px 20px 20px;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+/* Estilo para as caixas da tabela e do resumo */
+.table-box, .aside-box {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+/* Estilo para a Tabela e Resumo */
+.main-content {
+    margin: 20px 20px 0 20px;
+}
+
+#painelTable thead th {
+    background-color: #0C296C;
+    color: white;
+}
+
+/* Centraliza o conteúdo de todas as células */
+#painelTable th,
+#painelTable td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Ajuste de largura das colunas */
+#painelTable th:nth-child(1),
+#painelTable td:nth-child(1) {
+    width: 50px;
+}
+#painelTable th:nth-child(2),
+#painelTable td:nth-child(2) {
+    width: 80px;
+}
+#painelTable th:nth-child(3),
+#painelTable td:nth-child(3) {
+    width: 80px;
+}
+#painelTable th:nth-child(4),
+#painelTable td:nth-child(4) {
+    width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#painelTable th:nth-child(5),
+#painelTable td:nth-child(5) {
+    width: 60px;
+}
+#painelTable th:nth-child(6),
+#painelTable td:nth-child(6) {
+    width: 100px;
+}
+#painelTable th:nth-child(7),
+#painelTable td:nth-child(7) {
+    width: 100px;
+}
+#painelTable th:nth-child(8),
+#painelTable td:nth-child(8) {
+    width: 60px;
+}
+#painelTable th:nth-child(9),
+#painelTable td:nth-child(9) {
+    width: 60px;
+}
+#painelTable th:nth-child(10),
+#painelTable td:nth-child(10) {
+    width: 40px;
+}
+#painelTable th:nth-child(11),
+#painelTable td:nth-child(11) {
+    width: 200px;
+}
+
+/* Estilo para a célula de status que usa flexbox para centralizar */
+#painelTable td:nth-child(10) {
+    
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    box-sizing: border-box;
+    
+    border-top: none;
+    border-bottom: none;
+    border-right: 1px solid #dee2e6;
+    border-left: 1px solid #dee2e6;
+    
+    vertical-align: middle;
+}
+
+/* Estilo para as bordas das linhas noturnas (agora brancas) */
+.noturno-row, .noturno-row > td {
+    background-color: #dee2e6 !important;
+    border-color: white !important;
+}
+
+/* Estilo para as bordas da célula de status em linhas noturnas */
+.noturno-row td:nth-child(10) {
+    border-color: white; /* Corrigido para branco */
+}
+
+/* Estilo para as bordas da célula de status em linhas diurnas */
+.diurno-row td:nth-child(10) {
+    border-color: white;
+}
+
+/* Classes para colorir as linhas */
+.diurno-row, .diurno-row > td {
+    background-color: #ffffff !important;
+}
+
+/* Garante que o hover funcione nas novas classes */
+.table-hover .noturno-row:hover,
+.table-hover .noturno-row:hover > td {
+    background-color: #c0c4c7 !important;
+}
+.table-hover .diurno-row:hover,
+.table-hover .diurno-row:hover > td {
+    background-color: #f8f9fa !important;
+}
+
+/* Nova classe para o status preto */
+.status-black {
+    background-color: black !important;
+}
+
+aside {
+    width: 500px;
+    padding: 20px;
+}
+.legend-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+}
+.legend-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid #ccc;
+}
+.legend-dot.white { background-color: white; }
+.legend-dot.blue { background-color: blue; }
+.legend-dot.yellow { background-color: yellow; }
+.legend-dot.red { background-color: red; }
+.legend-dot.green { background-color: green; }
+.legend-dot.black { background-color: black; }
+
+/* Estilo para a seção de importação e botões */
+.import-section .form-control {
+    display: block;
+}
+.import-btn {
+    background-color: #0C296C;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    transition: background-color 0.3s;
+}
+.import-btn:hover {
+    background-color: #004d80;
+}
+.file-upload-container, .paste-data-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.paste-data-container {
+    flex-direction: column;
+    align-items: stretch;
+}
+#pasteData {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+}
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.modal-btn {
+    background-color: #0C296C;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    margin-top: 10px;
+}
+
+/* Ajustes para telas menores */
+@media (max-width: 768px) {
+    header {
+        padding: 0 15px;
+    }
+    header img {
+        height: 60px;
+        width: auto;
+    }
+    .header-title {
+        font-size: 24px;
+        text-align: left;
+        flex-grow: 1;
+    }
+    .main-content {
+        flex-direction: column;
+    }
+    .table-container, aside {
+        width: 100%;
+        margin-right: 0 !important;
+        margin-bottom: 20px;
+    }
+}
+    </style>
+</head>
+<body>
+    
+    <header class="navbar navbar-dark" style="background-color: #0C296C;">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="imagem/baixados.png" alt="Logo">
+        </a>
+        <h2 class="header-title">PAINEL GESTÃO À VISTA APA</h2>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#rankingMenu" aria-controls="rankingMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="rankingMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        RANKING DO DIA
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#">RANKING CONFERENTES</a></li>
+                        <li><a class="dropdown-item" href="#">DOCAS</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<div class="import-box">
+    <section class="import-section p-3">
+        <p class="text-center fw-bold">Escolha um método de importação:</p>
+        <div class="d-flex flex-column align-items-center mb-4">
+            <h5 class="text-center">1. Importar de Arquivo CSV</h5>
+            <div class="w-75">
+                <input type="file" id="fileInput" accept=".csv" class="form-control">
+            </div>
+            <button id="importarBtn" class="btn btn-primary btn-sm mt-2">Processar Arquivo</button>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="d-flex flex-column align-items-start">
+            <h5 class="text-center">2. Cole os dados da sua planilha do Excel aqui...</h5>
+            <textarea id="pasteData" class="form-control form-control-sm mb-2" rows="3"></textarea>
+            <button id="pasteBtn" class="btn btn-primary btn-sm align-self-end">Colar e Importar</button>
+        </div>
+    </section>
+</div>
+
+<div class="main-content d-flex justify-content-between">
+    <div class="table-container flex-grow-1 table-box me-3">
+        <div class="table-responsive">
+            <table id="painelTable" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>JANELA</th>
+                        <th>CARRETA<br>NA DOCA</th>
+                        <th>PLACA<br>DO VEÍCULO</th>
+                        <th>CLIENTE</th>
+                        <th>VOLUMES</th>
+                        <th>CONFERENTE</th>
+                        <th>DOCA</th>
+                        <th>INÍCIO</th>
+                        <th>FIM</th>
+                        <th>STATUS</th>
+                        <th>OBS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <aside class="flex-shrink-0 aside-box">
+        <h2>Resumo do Painel</h2>
+        <div class="legend-container">
+            <div class="legend-item">
+                <div class="legend-dot white"></div>
+                <span>No Prazo</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot blue"></div>
+                <span>Em andamento</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot yellow"></div>
+                <span>Em andamento com atraso</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot red"></div>
+                <span>Em Atraso ou Perdeu Janela</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot green"></div>
+                <span>Finalizado no horário</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot black"></div>
+                <span>Sem informações</span>
+            </div>
+        </div>
+        <div id="summary-info">
+        </div>
+    </aside>
+</div>
+
+<div class="card" style="text-align: center; margin: 20px;">
+    <button id="fullscreenBtn" class="import-btn" style="width: 100%;">Visualizar em Tela Cheia</button>
+    <div class="button-group">
+        <button id="addConferenteBtn" class="import-btn">Inserir Novo Conferente</button>
+        <button id="addObsBtn" class="import-btn">Inserir Nova Observação</button>
+        <button id="exportExcelBtn" class="import-btn">Exportar para Excel</button>
+    </div>
+</div>
+    
+<div class="modal fade" id="alertaConferenteModal" tabindex="-1" aria-labelledby="alertaConferenteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="alertaConferenteModalLabel">Atenção!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        INSIRA A DOCA E O HORARIO INICIAL DO CARREGAMENTO
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="alertaAtrasoModal" tabindex="-1" aria-labelledby="alertaAtrasoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="alertaAtrasoModalLabel">Atraso Detectado!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        INFORME O MOTIVO DO ATRASO!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="alertaSucessoModal" tabindex="-1" aria-labelledby="alertaSucessoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <h3 class="fw-bold text-success">PARABÉNS!!!</h3>
+        <p>Seu carregamento foi concluído dentro do horário da janela de carregamento.</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalConferente" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close" id="closeConferenteModal">&times;</span>
+        <h3>Inserir Novo Conferente</h3>
+        <form id="formConferente">
+            <label for="inputConferente">Nome do Conferente:</label>
+            <input type="text" id="inputConferente" name="conferente" required>
+            <button type="submit" class="modal-btn">Adicionar Conferente</button>
+        </form>
+    </div>
+</div>
+
+<div id="modalObs" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close" id="closeObsModal">&times;</span>
+        <h3>Inserir Nova Observação</h3>
+        <form id="formObs">
+            <label for="inputObs">Nova Observação:</label>
+            <input type="text" id="inputObs" name="observacao" required>
+            <button type="submit" class="modal-btn">Adicionar Observação</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('fileInput');
+        const importarBtn = document.getElementById('importarBtn');
+        const pasteData = document.getElementById('pasteData');
+        const pasteBtn = document.getElementById('pasteBtn');
+        const painelTableBody = document.querySelector('#painelTable tbody');
+        const summaryInfo = document.getElementById('summary-info');
+        const localStorageKeyDados = 'painelCarregamentoDados';
+        
+        let estadoPorLinha = {};
+        const localStorageKeyEstado = 'painelCarregamentoEstadoPlacaJanela';
+
+        // Cria as instâncias dos modais UMA VEZ ao carregar a página
+        const alertaConferenteModal = new bootstrap.Modal(document.getElementById('alertaConferenteModal'));
+        const alertaAtrasoModal = new bootstrap.Modal(document.getElementById('alertaAtrasoModal'));
+        const alertaSucessoModal = new bootstrap.Modal(document.getElementById('alertaSucessoModal'));
+
+
+        const conferentes = ['Selecione...', 'ALMREP', 'ARIONALDO', 'ARLLYSON', 'CÍCERO', 'ERISOM', 'ERNANDES', 'FABIANO', 'FÁBIO', 'FRANCIE', 'ISMAEL', 'JOEL', 'MICIANO', 'TIAGO', 'WENDEL'];
+        const docas = ['Selecione...', 'DOCA 1', 'DOCA 2', 'DOCA 3', 'DOCA 4', 'DOCA 5', 'DOCA 6', 'DOCA 7', 'DOCA 8', 'DOCA 9', 'DOCA 10'];
+        const observacoesList = ['Selecione...', 'ABSENTEÍSMO CAPATAZIA', 'ABSENTEÍSMO ESMALTEC', 'AGUARDANDO COMPLEMENTO DE CARGA', 'ANTECIPADO', 'APA EM FALHAS CONSTANTES', 'APA EM MANUTENÇÃO', 'ATRASO - COMERCIAL DIURNO', 'ATRASO - COMERCIAL NOTURNO', 'ATRASO - PROGRAMAÇÃO LOGÍSTICA', 'ATRASO - QUEDA DE CONTENTOR NO APA', 'ATRASO - VEÍCULO NÃO SE APRESENTOU', 'ATRASO - WMS SEM CONEXÃO COM A REDE', 'CARREGAMENTO NO APA2', 'DESISTÊNCIA DO MOTORISTA', 'FALHA OPERACIONAL DA EXPEDIÇÃO', 'LOGÍSTICA REVERSA', 'PEDIDO POSTERGADO PELO CLIENTE', 'PRODUTOS EM PRODUÇÃO', 'PRODUTOS MOLHADOS', 'RECUSADO - VEÍCULO COM INFILTRAÇÃO', 'RECUSADO - VEÍCULO INADEQUADO', 'RECUSADO - VEÍCULO NÃO COUBE A CARGA', 'SEM OS ITENS BÁSICOS PARA CARREGAMENTO', 'SEM PROGRAMAÇÃO', 'TREINAMENTO COLABORADORES NOVO WMS'];
+
+        const colunaMap = {
+            'Janela': 'JANELA',
+            'Carreta na Doca': 'CARRETA NA DOCA',
+            'Placa': 'PLACA DO VEÍCULO',
+            'Cliente': 'CLIENTE',
+            'Volume': 'VOLUMES',
+        };
+        
+        function salvarEstado() {
+            try {
+                localStorage.setItem(localStorageKeyEstado, JSON.stringify(estadoPorLinha));
+            } catch (e) {
+                console.error("Erro ao salvar o estado no localStorage: ", e);
+            }
+        }
+        
+        function carregarEstado() {
+            try {
+                const savedData = localStorage.getItem(localStorageKeyEstado);
+                if (savedData) {
+                    estadoPorLinha = JSON.parse(savedData);
+                }
+            } catch (e) {
+                console.error("Erro ao carregar o estado do localStorage: ", e);
+                estadoPorLinha = {};
+            }
+        }
+        
+        function salvarDados(dados) {
+            try {
+                localStorage.setItem(localStorageKeyDados, dados);
+            } catch (e) {
+                console.error("Erro ao salvar os dados no localStorage:", e);
+            }
+        }
+
+        function carregarDados() {
+            try {
+                const savedData = localStorage.getItem(localStorageKeyDados);
+                if (savedData) {
+                    processAndDisplayData(savedData);
+                }
+            } catch (e) {
+                console.error("Erro ao carregar os dados do localStorage:", e);
+                localStorage.removeItem(localStorageKeyDados);
+            }
+        }
+        
+        function parseLine(line) {
+            const result = [];
+            let inQuotes = false;
+            let currentField = '';
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+            
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentField += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if ((char === ',' || char === '\t') && !inQuotes) {
+                    result.push(currentField.trim());
+                    currentField = '';
+                } else {
+                    currentField += char;
+                }
+            }
+            result.push(currentField.trim());
+            
+            return result.map(field => field.replace(/^"|"$/g, ''));
+        }
+
+        function processAndDisplayData(data) {
+            painelTableBody.innerHTML = '';
+            const rows = data.split('\n').filter(row => row.trim() !== '');
+        
+            if (rows.length === 0) {
+                return;
+            }
+        
+            carregarEstado();
+            
+            let headerRowIndex = -1;
+            let originalHeaders = [];
+        
+            for (let i = 0; i < rows.length; i++) {
+                const line = rows[i].trim();
+                const columns = parseLine(line);
+                if (columns.some(c => c.toLowerCase().includes('janela') || c.toLowerCase().includes('placa') || c.toLowerCase().includes('volume'))) {
+                    headerRowIndex = i;
+                    originalHeaders = columns.map(c => c.trim());
+                    break;
+                }
+            }
+        
+            const headerMap = {};
+            Object.keys(colunaMap).forEach(key => {
+                const index = originalHeaders.indexOf(key);
+                if (index !== -1) {
+                    headerMap[key] = index;
+                }
+            });
+        
+            for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                const line = rows[i].trim();
+                if (!line) continue;
+                const columns = parseLine(line);
+        
+                const newRow = document.createElement('tr');
+        
+                const importedData = {};
+                Object.keys(colunaMap).forEach(key => {
+                    const columnIndex = headerMap[key];
+                    importedData[key] = (columnIndex !== undefined && columns[columnIndex]) ? columns[columnIndex].trim() : '';
+                    const cell = document.createElement('td');
+                    cell.textContent = importedData[key];
+                    newRow.appendChild(cell);
+                });
+                
+                const placa = importedData['Placa'] || '';
+                const janela = importedData['Janela'] || '';
+                const chaveUnica = `${placa.toLowerCase().trim()}_${janela.toLowerCase().trim()}`;
+                const estadoAtual = estadoPorLinha[chaveUnica] || {};
+                
+                // Aplica a classe de turno na linha da tabela
+                const carretaDocaTime = importedData['Carreta na Doca'] || '';
+                const hora = parseInt(carretaDocaTime.split(':')[0]);
+                if (!isNaN(hora) && ((hora >= 1 && hora <= 4) || (hora >= 21 && hora <= 23))) {
+                    newRow.classList.add('noturno-row');
+                } else if (!isNaN(hora) && (hora >= 8 && hora <= 16)) {
+                    newRow.classList.add('diurno-row');
+                }
+                
+                const conferenteCell = document.createElement('td');
+                const conferenteSelect = document.createElement('select');
+                conferenteSelect.classList.add('form-select', 'form-select-sm');
+                conferentes.forEach(nome => {
+                    const option = document.createElement('option');
+                    option.value = nome;
+                    option.textContent = nome;
+                    conferenteSelect.appendChild(option);
+                });
+
+                if (estadoAtual.conferente) {
+                    conferenteSelect.value = estadoAtual.conferente;
+                }
+                
+                conferenteSelect.addEventListener('change', (e) => {
+                    estadoPorLinha[chaveUnica] = { ...estadoPorLinha[chaveUnica], conferente: e.target.value };
+                    salvarEstado();
+                    if (e.target.value !== 'Selecione...') {
+                        alertaConferenteModal.show();
+                    }
+                });
+                conferenteCell.appendChild(conferenteSelect);
+                newRow.appendChild(conferenteCell);
+        
+                const docaCell = document.createElement('td');
+                const docaSelect = document.createElement('select');
+                docaSelect.classList.add('form-select', 'form-select-sm');
+                docas.forEach(nome => {
+                    const option = document.createElement('option');
+                    option.value = nome;
+                    option.textContent = nome;
+                    docaSelect.appendChild(option);
+                });
+                if (estadoAtual.doca) {
+                    docaSelect.value = estadoAtual.doca;
+                }
+
+                docaSelect.addEventListener('change', (e) => {
+                    estadoPorLinha[chaveUnica] = { ...estadoPorLinha[chaveUnica], doca: e.target.value };
+                    salvarEstado();
+                });
+                docaCell.appendChild(docaSelect);
+                newRow.appendChild(docaCell);
+        
+                const inicioCell = document.createElement('td');
+                const inicioInput = document.createElement('input');
+                inicioInput.type = 'time';
+                inicioInput.classList.add('form-control', 'form-control-sm');
+                
+                const cliente = importedData['Cliente'] || '';
+                const volumes = importedData['Volume'] || '';
+                const isDataIncomplete = !placa.trim() || !cliente.trim() || (volumes === '' || volumes === '0');
+
+                inicioInput.disabled = isDataIncomplete;
+                if (isDataIncomplete) {
+                    inicioInput.title = "Preencha a Placa, Cliente e Volumes para habilitar.";
+                }
+                if (estadoAtual.inicio) {
+                    inicioInput.value = estadoAtual.inicio;
+                }
+                
+                inicioInput.addEventListener('change', (e) => {
+                    estadoPorLinha[chaveUnica] = { ...estadoPorLinha[chaveUnica], inicio: e.target.value };
+                    salvarEstado();
+                    const carretaDocaTime = newRow.querySelector('td:nth-child(2)').textContent.trim();
+
+                    const [inicioHours, inicioMinutes] = e.target.value.split(':').map(Number);
+                    const [carretaHours, carretaMinutes] = carretaDocaTime.split(':').map(Number);
+                    
+                    const inicioDate = new Date();
+                    inicioDate.setHours(inicioHours, inicioMinutes, 0, 0);
+
+                    const carretaDate = new Date();
+                    carretaDate.setHours(carretaHours, carretaMinutes, 0, 0);
+
+                    if (inicioDate > carretaDate) {
+                        alertaAtrasoModal.show();
+                    }
+                });
+                inicioCell.appendChild(inicioInput);
+                newRow.appendChild(inicioCell);
+                
+                const fimCell = document.createElement('td');
+                const fimInput = document.createElement('input');
+                fimInput.type = 'time';
+                fimInput.classList.add('form-control', 'form-control-sm');
+                fimInput.disabled = isDataIncomplete;
+                if (isDataIncomplete) {
+                    fimInput.title = "Preencha a Placa, Cliente e Volumes para habilitar.";
+                }
+                if (estadoAtual.fim) {
+                    fimInput.value = estadoAtual.fim;
+                }
+
+                fimInput.addEventListener('blur', () => {
+                    validarDuracao();
+                });
+
+                fimInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        validarDuracao();
+                    }
+                });
+
+                function validarDuracao() {
+                    if (!inicioInput.value || !fimInput.value) {
+                        return;
+                    }
+
+                    estadoPorLinha[chaveUnica] = { ...estadoPorLinha[chaveUnica], fim: fimInput.value };
+                    salvarEstado();
+                    const inicioTime = inicioInput.value;
+                    
+                    const [inicioHours, inicioMinutes] = inicioTime.split(':').map(Number);
+                    const [fimHours, fimMinutes] = fimInput.value.split(':').map(Number);
+                    
+                    let inicioDate = new Date();
+                    inicioDate.setHours(inicioHours, inicioMinutes, 0, 0);
+
+                    let fimDate = new Date();
+                    fimDate.setHours(fimHours, fimMinutes, 0, 0);
+
+                    if (fimDate < inicioDate) {
+                        fimDate.setDate(fimDate.getDate() + 1);
+                    }
+
+                    const durationInMinutes = (fimDate.getTime() - inicioDate.getTime()) / (1000 * 60);
+
+                    if (durationInMinutes > 60) {
+                        alertaAtrasoModal.show();
+                    } else {
+                        alertaSucessoModal.show();
+                    }
+                }
+
+                fimCell.appendChild(fimInput);
+                newRow.appendChild(fimCell);
+        
+                const statusCell = document.createElement('td');
+                newRow.appendChild(statusCell);
+
+                const obsCell = document.createElement('td');
+                const obsSelect = document.createElement('select');
+                obsSelect.classList.add('form-select', 'form-select-sm');
+
+                if (estadoAtual.obs) {
+                    obsSelect.value = estadoAtual.obs;
+                }
+
+                observacoesList.forEach(obs => {
+                    const option = document.createElement('option');
+                    option.value = obs;
+                    option.textContent = obs;
+                    obsSelect.appendChild(option);
+                });
+                
+                obsSelect.addEventListener('change', (e) => {
+                    estadoPorLinha[chaveUnica] = { ...estadoPorLinha[chaveUnica], obs: e.target.value };
+                    salvarEstado();
+                    
+                    const row = e.target.closest('tr');
+                    const placa = row.querySelector('td:nth-child(3)').textContent.trim();
+                    const cliente = row.querySelector('td:nth-child(4)').textContent.trim();
+                    const volumes = row.querySelector('td:nth-child(5)').textContent.trim();
+                    const statusCell = row.querySelector('td:nth-child(10)');
+
+                    const volumesIsEmpty = volumes === '' || volumes === '0';
+                    const isObsSelected = e.target.value !== 'Selecione...';
+                    
+                    if (isObsSelected && !placa && !cliente && volumesIsEmpty) {
+                        statusCell.classList.add('status-black');
+                    } else {
+                        statusCell.classList.remove('status-black');
+                    }
+                });
+                obsCell.appendChild(obsSelect);
+                newRow.appendChild(obsCell);
+        
+                painelTableBody.appendChild(newRow);
+            }
+        }
+
+        // Evento para o botão de Processar Arquivo (Importar CSV)
+        importarBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    salvarDados(content);
+                    processAndDisplayData(content);
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Por favor, selecione um arquivo CSV.');
+            }
+        });
+
+        // Evento para o botão de Colar e Importar
+        pasteBtn.addEventListener('click', () => {
+            const data = pasteData.value;
+            if (data) {
+                salvarDados(data);
+                processAndDisplayData(data);
+            } else {
+                alert('Por favor, cole os dados da sua planilha.');
+            }
+        });
+
+        // ===============================================
+        // Funções e eventos não relacionados diretamente à importação de dados,
+        // mas que mantêm a funcionalidade do seu painel.
+        // ===============================================
+        
+        // Exemplo de código para exportar a tabela para Excel (mantido do anexo)
+        function exportTableToExcel() {
+            const table = document.getElementById('painelTable');
+            const data = new Date();
+            const filename = `Painel_APA_${data.toLocaleDateString()}_${data.toLocaleTimeString()}.xls`;
+
+            const html = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    </head>
+                <body>
+                    ${table.outerHTML}
+                </body>
+                </html>
+            `;
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('exportExcelBtn').addEventListener('click', exportTableToExcel);
+
+        // Funções e eventos para os modais (mantidos do anexo)
+        const addConferenteBtn = document.getElementById('addConferenteBtn');
+        const modalConferente = new bootstrap.Modal(document.getElementById('modalConferente'));
+        const closeConferenteModal = document.getElementById('closeConferenteModal');
+        addConferenteBtn.addEventListener('click', () => { modalConferente.show(); });
+        closeConferenteModal.addEventListener('click', () => { modalConferente.hide(); });
+
+        const addObsBtn = document.getElementById('addObsBtn');
+        const modalObs = new bootstrap.Modal(document.getElementById('modalObs'));
+        const closeObsModal = document.getElementById('closeObsModal');
+        addObsBtn.addEventListener('click', () => { modalObs.show(); });
+        closeObsModal.addEventListener('click', () => { modalObs.hide(); });
+        
+        carregarDados();
+    });
+</script>
+</body>
+</html>
