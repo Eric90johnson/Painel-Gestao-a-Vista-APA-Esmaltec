@@ -18,6 +18,8 @@
 
 
   <script src="/Javascript/script.js" defer></script>
+
+
 </head>
 
 <body>
@@ -36,7 +38,7 @@
 
   <div class="import-box mt-1 mb-2">
     <div class="card p-3">
-      <p class="text-center">Escolha um método de importação:</p>
+      <h4 class="text-center">Escolha um método de importação:</h4>
       <hr>
       <div class="mb-3">
         <h5 class="text-center">1. Importar de Arquivo CSV</h5>
@@ -135,7 +137,25 @@
     <button id="exportExcelBtn" class="btn btn-primary">Exportar para Excel</button>
   </div>
 
+<div class="modal fade" id="resetConfirmModal" tabindex="-1" aria-labelledby="resetConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="resetConfirmModalLabel">Confirmar Exclusão</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Você tem certeza que deseja apagar todos os dados da tabela? Esta ação não pode ser desfeita.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmResetBtn">Sim, Apagar Tudo</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <script src="/Javascript/script.js"></script>
 
 </body>
 
