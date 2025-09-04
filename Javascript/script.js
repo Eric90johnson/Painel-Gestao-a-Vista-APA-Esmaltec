@@ -108,6 +108,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusCircle = targetRow.querySelector('.status-circle-table');
             
             atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, statusCircle);
+            
+            // --- NOVA LÓGICA DE ALERTA PARA OBS ---
+            if (carretaNaDoca && carretaNaDoca.includes(':')) {
+                const dataBase = new Date('1970-01-01');
+                const docaTime = new Date(`${dataBase.toDateString()} ${carretaNaDoca}`);
+
+                // Alerta ao preencher INÍCIO com atraso
+                if (target.dataset.field === 'inicio' && inicio) {
+                    const inicioTime = new Date(`${dataBase.toDateString()} ${inicio}`);
+                    if (inicioTime > docaTime) {
+                        showBootstrapAlert('Início com atraso. Por favor, selecione o motivo na coluna OBS.', 'Atraso Detectado', 'warning');
+                    }
+                }
+
+                // Alerta ao preencher FIM com atraso
+                if (target.dataset.field === 'fim' && fim) {
+                    let fimTime = new Date(`${dataBase.toDateString()} ${fim}`);
+                    if (fimTime < docaTime) { // Corrige se o fim for no dia seguinte
+                        fimTime.setDate(fimTime.getDate() + 1);
+                    }
+                    const duracaoMinutos = (fimTime - docaTime) / 60000;
+                    if (duracaoMinutos > 60) {
+                        showBootstrapAlert('Finalizado com atraso. Por favor, selecione o motivo na coluna OBS.', 'Atraso Detectado', 'warning');
+                    }
+                }
+            }
+            // --- FIM DA NOVA LÓGICA ---
+
             unsavedChanges = true;
         }
     });
@@ -121,9 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÕES ---
 
-    /**
-     * FUNÇÃO REESCRITA: Atualiza a cor do círculo de status com base nas novas regras.
-     */
     function atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, statusCircle) {
         statusCircle.className = 'status-circle-table';
 
@@ -140,31 +165,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataBase = new Date('1970-01-01');
         const docaTime = new Date(`${dataBase.toDateString()} ${carretaNaDoca}`);
 
-        // Lógica para carregamento FINALIZADO (ambos os campos preenchidos)
         if (inicio && fim) {
             let fimTime = new Date(`${dataBase.toDateString()} ${fim}`);
-            // Corrige se o fim for no dia seguinte
             if (fimTime < docaTime) {
                 fimTime.setDate(fimTime.getDate() + 1);
             }
             const duracaoMinutos = (fimTime - docaTime) / 60000;
 
             if (duracaoMinutos <= 60) {
-                statusCircle.classList.add('status-blue'); // Finalizado no prazo (<= 1h da DOCA)
+                statusCircle.classList.add('status-blue');
             } else {
-                statusCircle.classList.add('status-red'); // Finalizado com atraso (> 1h da DOCA)
+                statusCircle.classList.add('status-red');
             }
         }
-        // Lógica para carregamento EM ANDAMENTO (apenas início preenchido)
         else if (inicio) {
             const inicioTime = new Date(`${dataBase.toDateString()} ${inicio}`);
             if (inicioTime > docaTime) {
-                statusCircle.classList.add('status-yellow'); // Em andamento, iniciou com atraso
+                statusCircle.classList.add('status-yellow');
             } else {
-                statusCircle.classList.add('status-green'); // Em andamento, iniciou no prazo
+                statusCircle.classList.add('status-green');
             }
         }
-        // Carregamento AGUARDANDO
         else {
             statusCircle.classList.add('status-white');
         }
@@ -287,7 +308,13 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.values(colunaMap).forEach(nomeColunaTabela => {
                 const nomeColunaCSV = Object.keys(colunaMap).find(key => colunaMap[key] === nomeColunaTabela);
                 const indice = cabecalho.findIndex(h => h.toLowerCase() === nomeColunaCSV.toLowerCase());
-                const valor = (indice !== -1 && colunas[indice]) ? colunas[indice].replace(/"/g, '').trim() : '';
+                let valor = (indice !== -1 && colunas[indice]) ? colunas[indice].replace(/"/g, '').trim() : '';
+                if (nomeColunaCSV === 'Cliente') {
+                    const palavras = valor.split(' ');
+                    if (palavras.length > 2) {
+                        valor = `${palavras[0]} ${palavras[1]}`;
+                    }
+                }
                 const cell = document.createElement('td');
                 cell.textContent = valor;
                 row.appendChild(cell);
@@ -326,11 +353,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if ((hora >= 20 && hora <= 23) || (hora >= 0 && hora <= 4)) row.classList.add('turno-noturno');
                 else if (hora >= 8 && hora <= 16) row.classList.add('turno-diurno');
             }
+            
             for (let i = 0; i < 5; i++) {
                 const cell = document.createElement('td');
-                cell.textContent = rowData[i] || '';
+                let valor = rowData[i] || '';
+                if (i === 3) {
+                    const palavras = valor.split(' ');
+                    if (palavras.length > 2) {
+                        valor = `${palavras[0]} ${palavras[1]}`;
+                    }
+                }
+                cell.textContent = valor;
                 row.appendChild(cell);
             }
+
             row.innerHTML += `
                 <td><select class="form-select form-select-sm">${conferentesOptionsHTML}</select></td>
                 <td><select class="form-select form-select-sm">${docasOptionsHTML}</select></td>

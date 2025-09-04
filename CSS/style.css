@@ -103,33 +103,32 @@ header > div {
 #painelTable {
     width: 100%;
     border-collapse: collapse;
-    /* table-layout: fixed; FOI REMOVIDO PARA PERMITIR LARGURAS VARIÁVEIS */
-    font-size: 0.9em;
+    font-size: 0.8em; /* FONTE GERAL DA TABELA DIMINUÍDA */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 #painelTable th,
 #painelTable td {
     border: 1px solid #dee2e6;
-    padding: 8px;
+    padding: 2px 4px; /* PADDING VERTICAL REDUZIDO PARA DIMINUIR A ALTURA DA LINHA */
     text-align: center;
-    overflow: hidden;
-    white-space: nowrap; /* Impede que o texto quebre linha, mas 'text-overflow' cuida do excesso */
-    text-overflow: ellipsis; /* Adiciona "..." se o conteúdo for muito grande */
+    overflow: hidden; 
+    white-space: nowrap; 
+    text-overflow: ellipsis;
 }
 
-/* LARGURAS DAS COLUNAS AJUSTADAS */
-#painelTable th:nth-child(1), #painelTable td:nth-child(1) { width: 7%; }  /* JANELA */
-#painelTable th:nth-child(2), #painelTable td:nth-child(2) { width: 8%; }  /* CARRETA NA DOCA */
+/* LARGURAS DAS COLUNAS AJUSTADAS FINALMENTE */
+#painelTable th:nth-child(1), #painelTable td:nth-child(1) { width: 5%; }  /* JANELA - REDUZIDO */
+#painelTable th:nth-child(2), #painelTable td:nth-child(2) { width: 6%; }  /* CARRETA NA DOCA - REDUZIDO */
 #painelTable th:nth-child(3), #painelTable td:nth-child(3) { width: 8%; }  /* PLACA */
-#painelTable th:nth-child(4), #painelTable td:nth-child(4) { width: 10%; } /* CLIENTE - MAIOR */
+#painelTable th:nth-child(4), #painelTable td:nth-child(4) { width: 12%; } /* CLIENTE */
 #painelTable th:nth-child(5), #painelTable td:nth-child(5) { width: 7%; }  /* VOLUMES */
 #painelTable th:nth-child(6), #painelTable td:nth-child(6) { width: 10%; } /* CONFERENTE */
-#painelTable th:nth-child(7), #painelTable td:nth-child(7) { width: 15%; }  /* DOCA */
+#painelTable th:nth-child(7), #painelTable td:nth-child(7) { width: 8%; }  /* DOCA */
 #painelTable th:nth-child(8), #painelTable td:nth-child(8) { width: 7%; }  /* INÍCIO */
 #painelTable th:nth-child(9), #painelTable td:nth-child(9) { width: 7%; }  /* FIM */
 #painelTable th:nth-child(10), #painelTable td:nth-child(10) { width: 5%; } /* STATUS */
-#painelTable th:nth-child(11), #painelTable td:nth-child(11) { width: 30%; }/* OBS - MAIOR */
+#painelTable th:nth-child(11), #painelTable td:nth-child(11) { width: 25%; }/* OBS - AUMENTADO */
 
 
 #painelTable thead {
@@ -140,7 +139,15 @@ header > div {
 #painelTable thead th {
     font-weight: bold;
     text-transform: uppercase;
-    padding: 10px 5px;
+    padding: 8px 5px; /* PADDING DO CABEÇALHO AJUSTADO */
+}
+
+/* NOVA REGRA: DIMINUI A FONTE DOS INPUTS E SELECTS DENTRO DA TABELA */
+#painelTable select,
+#painelTable input[type="time"] {
+    font-size: 0.9em; /* Ajusta a fonte para ser um pouco menor que o texto da célula */
+    padding: 1px; /* Diminui o padding interno dos inputs/selects para compactar a linha */
+    height: auto; /* Garante que a altura se ajuste ao conteúdo */
 }
 
 
