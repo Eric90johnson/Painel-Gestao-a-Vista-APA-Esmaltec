@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <link rel="stylesheet" href="/CSS/style.css">
+    <link rel="stylesheet" href="/CSS/tabela.css">
 
     <script src="/Javascript/script.js" defer></script>
 </head>
@@ -60,61 +61,61 @@
     </button>
 </div>
 
-<div>
-    <div>
-        <div>
-            <table id="painelTable">
-                <thead>
-                    <tr>
-                        <th>JANELA</th>
-                        <th>CARRETA<br>NA DOCA</th>
-                        <th>PLACA<br>DO VEÍCULO</th>
-                        <th>CLIENTE</th>
-                        <th>VOLUMES</th>
-                        <th>CONFERENTE</th>
-                        <th>DOCA</th>
-                        <th>INÍCIO</th>
-                        <th>FIM</th>
-                        <th>STATUS</th>
-                        <th>OBS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
+<div class="main-content">
+    <div class="table-container">
+        <table id="painelTable">
+            <thead>
+                <tr>
+                    <th>JANELA</th>
+                    <th>CARRETA<br>NA DOCA</th>
+                    <th>PLACA<br>DO VEÍCULO</th>
+                    <th>CLIENTE</th>
+                    <th>VOLUMES</th>
+                    <th>CONFERENTE</th>
+                    <th>DOCA</th>
+                    <th>INÍCIO</th>
+                    <th>FIM</th>
+                    <th>STATUS</th>
+                    <th>OBS</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
-    <aside>
-        <h2>Resumo do Painel</h2>
-        <div>
+    <div class="aside-container">
+        <aside>
+            <h2>Resumo do Painel</h2>
             <div>
-                <div></div>
-                <span>No Prazo</span>
+                <div>
+                    <div></div>
+                    <span>No Prazo</span>
+                </div>
+                <div>
+                    <div></div>
+                    <span>Em andamento</span>
+                </div>
+                <div>
+                    <div></div>
+                    <span>Em andamento com atraso</span>
+                </div>
+                <div>
+                    <div></div>
+                    <span>Em Atraso ou Perdeu Janela</span>
+                </div>
+                <div>
+                    <div></div>
+                    <span>Finalizado no horário</span>
+                </div>
+                <div>
+                    <div></div>
+                    <span>Sem informações</span>
+                </div>
             </div>
-            <div>
-                <div></div>
-                <span>Em andamento</span>
+            <div id="summary-info">
             </div>
-            <div>
-                <div></div>
-                <span>Em andamento com atraso</span>
-            </div>
-            <div>
-                <div></div>
-                <span>Em Atraso ou Perdeu Janela</span>
-            </div>
-            <div>
-                <div></div>
-                <span>Finalizado no horário</span>
-            </div>
-            <div>
-                <div></div>
-                <span>Sem informações</span>
-            </div>
-        </div>
-        <div id="summary-info">
-        </div>
-    </aside>
+        </aside>
+    </div>
 </div>
 
 <div>
@@ -126,79 +127,9 @@
     </div>
 </div>
     
-<div>
-  <div>
-    <div>
-      <div>
-        <h5>Atenção!</h5>
-        <button type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div>
-        INSIRA A DOCA E O HORARIO INICIAL DO CARREGAMENTO
-      </div>
-      <div>
-        <button type="button" data-bs-dismiss="modal">Fechar</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div>
-  <div>
-    <div>
-      <div>
-        <h5>Atraso Detectado!</h5>
-        <button type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div>
-        INFORME O MOTIVO DO ATRASO!
-      </div>
-      <div>
-        <button type="button" data-bs-dismiss="modal">OK</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div>
-  <div>
-    <div>
-      <div>
-        <button type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div>
-        <h3>DADOS SALVOS COM SUCESSO!</h3>
-      </div>
-      <div>
-        <button type="button" data-bs-dismiss="modal">OK</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div id="modalConferente">
-    <div>
-        <span>&times;</span>
-        <h3>Inserir Novo Conferente</h3>
-        <form>
-            <label for="inputConferente">Nome do Conferente:</label>
-            <input type="text" id="inputConferente" name="conferente" required>
-            <button type="submit">Adicionar Conferente</button>
-        </form>
-    </div>
-</div>
-
-<div id="modalObs">
-    <div>
-        <span>&times;</span>
-        <h3>Inserir Nova Observação</h3>
-        <form>
-            <label for="inputObs">Nova Observação:</label>
-            <input type="text" id="inputObs" name="observacao" required>
-            <button type="submit">Adicionar Observação</button>
-        </form>
-    </div>
-</div>
 
 </body>
 </html>

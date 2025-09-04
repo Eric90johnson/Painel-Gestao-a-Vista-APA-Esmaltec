@@ -1,0 +1,67 @@
+{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* Estilo para as caixas de conteúdo */
+.table-container,
+.aside-container {
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #c2c0c0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+.main-content {
+    display: flex;
+    padding: 10px 10px; /* Adiciona o espaçamento lateral */
+    gap: 10px; /* Adiciona o espaçamento entre as caixas */
+}
+
+/* Distribuição de largura das caixas */
+.table-container {
+    flex-basis: 75%;
+}
+
+.aside-container {
+    flex-basis: 25%;
+}
+
+/* tabela */
+
+#painelTable {
+    width: 100%; /* Garante que a tabela ocupe toda a largura do seu contêiner (75% da página) */
+    border-collapse: collapse; /* Remove o espaçamento entre as bordas das células */
+    table-layout: fixed; /* Garante que as colunas tenham a mesma largura */
+    font-size: 0.9em;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra sutil */
+}
+
+#painelTable th,
+#painelTable td {
+    border: 1px solid #dee2e6; /* Borda leve para as células */
+    padding: 8px; /* Espaçamento interno para as células */
+    text-align: center; /* Centraliza o texto nas células */
+    overflow: hidden; /* Esconde qualquer conteúdo que exceda a célula */
+    white-space: nowrap; /* Impede a quebra de linha do texto */
+}
+
+#painelTable thead {
+    background-color: #0C296C; /* Cor do cabeçalho da tabela */
+    color: white; /* Cor do texto no cabeçalho */
+}
+
+#painelTable thead th {
+    font-weight: bold; /* Deixa o texto do cabeçalho em negrito */
+    text-transform: uppercase; /* Transforma o texto em maiúsculo */
+    padding: 10px 5px;
+}
+
+#painelTable tbody tr:nth-child(even) {
+    background-color: #f2f2f2; /* Cor de fundo para as linhas pares (listras) */
+}
+
+#painelTable tbody tr:hover {
+    background-color: #e9ecef; /* Cor de fundo quando o mouse passa por cima da linha */
+}
