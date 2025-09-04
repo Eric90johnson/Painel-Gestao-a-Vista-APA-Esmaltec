@@ -48,14 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return a.localeCompare(b);
     });
 
-    // Mapeamento das colunas
-    const colunaMap = {
-        'Janela': 'JANELA',
-        'Carreta na Doca': 'CARRETA NA DOCA',
-        'Placa': 'PLACA DO VEÍCULO',
-        'Cliente': 'CLIENTE',
-        'Volume': 'VOLUMES',
-    };
+    // Ordem das colunas esperada se não houver um cabeçalho nos dados colados
+    const cabecalhoPadrao = ['Janela', 'Local', 'Hora Prog. Distribuição', 'Carreta na Portaria', 'Entrada Portaria', 'Carreta na Doca', 'Data a Expedir', 'Transportador', 'Placa', 'PM', 'Remessa', 'Cliente', 'Destino', 'Agenda', 'Volume'];
+    
+    // Colunas que queremos extrair e exibir na tabela
+    const colunasDesejadas = ['Janela', 'Carreta na Doca', 'Placa', 'Cliente', 'Volume'];
 
     // --- CARREGAMENTO INICIAL ---
     loadData();
@@ -109,12 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, statusCircle);
             
-            // --- NOVA LÓGICA DE ALERTA PARA OBS ---
             if (carretaNaDoca && carretaNaDoca.includes(':')) {
                 const dataBase = new Date('1970-01-01');
                 const docaTime = new Date(`${dataBase.toDateString()} ${carretaNaDoca}`);
 
-                // Alerta ao preencher INÍCIO com atraso
                 if (target.dataset.field === 'inicio' && inicio) {
                     const inicioTime = new Date(`${dataBase.toDateString()} ${inicio}`);
                     if (inicioTime > docaTime) {
@@ -122,10 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Alerta ao preencher FIM com atraso
                 if (target.dataset.field === 'fim' && fim) {
                     let fimTime = new Date(`${dataBase.toDateString()} ${fim}`);
-                    if (fimTime < docaTime) { // Corrige se o fim for no dia seguinte
+                    if (fimTime < docaTime) {
                         fimTime.setDate(fimTime.getDate() + 1);
                     }
                     const duracaoMinutos = (fimTime - docaTime) / 60000;
@@ -134,8 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            // --- FIM DA NOVA LÓGICA ---
-
             unsavedChanges = true;
         }
     });
@@ -149,44 +141,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÕES ---
 
+    function salvarEstadoAtualDaTabela() {
+        const estado = {};
+        const rows = tabelaCorpo.querySelectorAll('tr');
+        rows.forEach(row => {
+            const placa = row.cells[2].textContent.trim();
+            const cliente = row.cells[3].textContent.trim();
+
+            if (placa && cliente) {
+                // CHAVE DE IDENTIFICAÇÃO CORRIGIDA: Usa apenas Placa e Cliente.
+                const chave = `${placa}-${cliente}`;
+                estado[chave] = {
+                    conferente: row.querySelector('select[data-field="conferente"]').value,
+                    doca: row.querySelector('select[data-field="doca"]').value,
+                    inicio: row.querySelector('input[data-field="inicio"]').value,
+                    fim: row.querySelector('input[data-field="fim"]').value,
+                    obs: row.querySelector('select[data-field="obs"]').value,
+                };
+            }
+        });
+        return estado;
+    }
+
     function atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, statusCircle) {
         statusCircle.className = 'status-circle-table';
-
         if (!placa && !cliente && !volumes) {
             statusCircle.classList.add('status-black');
             return;
         }
-
         if (!carretaNaDoca || !carretaNaDoca.includes(':')) {
             statusCircle.classList.add('status-white');
             return;
         }
-
         const dataBase = new Date('1970-01-01');
         const docaTime = new Date(`${dataBase.toDateString()} ${carretaNaDoca}`);
-
         if (inicio && fim) {
             let fimTime = new Date(`${dataBase.toDateString()} ${fim}`);
-            if (fimTime < docaTime) {
-                fimTime.setDate(fimTime.getDate() + 1);
-            }
+            if (fimTime < docaTime) fimTime.setDate(fimTime.getDate() + 1);
             const duracaoMinutos = (fimTime - docaTime) / 60000;
-
-            if (duracaoMinutos <= 60) {
-                statusCircle.classList.add('status-blue');
-            } else {
-                statusCircle.classList.add('status-red');
-            }
-        }
-        else if (inicio) {
+            if (duracaoMinutos <= 60) statusCircle.classList.add('status-blue');
+            else statusCircle.classList.add('status-red');
+        } else if (inicio) {
             const inicioTime = new Date(`${dataBase.toDateString()} ${inicio}`);
-            if (inicioTime > docaTime) {
-                statusCircle.classList.add('status-yellow');
-            } else {
-                statusCircle.classList.add('status-green');
-            }
-        }
-        else {
+            if (inicioTime > docaTime) statusCircle.classList.add('status-yellow');
+            else statusCircle.classList.add('status-green');
+        } else {
             statusCircle.classList.add('status-white');
         }
     }
@@ -206,26 +205,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function processRawData(rawData) {
+        const estadoAnterior = salvarEstadoAtualDaTabela();
         try {
             const { cabecalho, dados } = parseData(rawData);
-            renderizarTabela(dados, cabecalho);
+            renderizarTabela(dados, cabecalho, estadoAnterior);
             unsavedChanges = true;
-            showBootstrapAlert('Dados importados! Lembre-se de salvar as alterações clicando no ícone de disquete.', 'Importação Concluída', 'info');
+            showBootstrapAlert('Dados atualizados! O estado anterior foi preservado. Lembre-se de salvar.', 'Atualização Concluída', 'info');
         } catch (error) {
             console.error('Erro ao processar dados:', error);
-            showBootstrapAlert(`Erro ao processar os dados: ${error.message}`, 'Erro na Importação', 'danger');
+            showBootstrapAlert(`Erro ao processar os dados: ${error.message}`, 'Erro na Atualização', 'danger');
         }
     }
 
     function saveData() {
         const tableData = [];
-        const tableRows = tabelaCorpo.querySelectorAll('tr');
-        tableRows.forEach(row => {
+        tabelaCorpo.querySelectorAll('tr').forEach(row => {
             const rowData = [];
             row.querySelectorAll('td').forEach(cell => {
                 const input = cell.querySelector('input, select');
-                if (input) rowData.push(input.value);
-                else rowData.push(cell.textContent);
+                rowData.push(input ? input.value : cell.textContent);
             });
             tableData.push(rowData);
         });
@@ -253,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
             cabecalho = parseCsvLine(linhas[headerIndex]);
             dados = linhas.slice(headerIndex + 1);
         } else {
-            cabecalho = parseCsvLine(linhas[0]);
-            dados = linhas.slice(1);
+            cabecalho = cabecalhoPadrao;
+            dados = linhas;
         }
         return { cabecalho, dados };
     }
@@ -282,10 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
         result.push(currentField.trim());
         return result.map(field => field.replace(/^"|"$/g, ''));
     }
-
-    function renderizarTabela(dados, cabecalho) {
+    
+    function renderizarTabela(dados, cabecalho, estadoAnterior = {}) {
         tabelaCorpo.innerHTML = '';
-        if (dados.length === 0 || (dados.length === 1 && dados[0].trim() === '')) return;
+        if (!dados || dados.length === 0) return;
 
         const conferentesOptionsHTML = listaDeConferentes.map(nome => `<option value="${nome}">${nome}</option>`).join('');
         const docasOptionsHTML = listaDeDocas.map(doca => `<option value="${doca}">${doca}</option>`).join('');
@@ -294,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dados.forEach(linha => {
             if (!linha.trim()) return;
             const colunas = parseCsvLine(linha);
-            if (colunas.length <= 1) return;
+            if (colunas.length < 5) return;
             const row = document.createElement('tr');
 
             const indiceCarretaNaDoca = cabecalho.findIndex(h => h.toLowerCase() === 'carreta na doca');
@@ -304,38 +302,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 if ((hora >= 20 && hora <= 23) || (hora >= 0 && hora <= 4)) row.classList.add('turno-noturno');
                 else if (hora >= 8 && hora <= 16) row.classList.add('turno-diurno');
             }
+            
+            const dataForCells = {};
+            colunasDesejadas.forEach(nomeColuna => {
+                const indice = cabecalho.findIndex(h => h.trim().toLowerCase() === nomeColuna.trim().toLowerCase());
+                dataForCells[nomeColuna] = (indice !== -1 && colunas[indice]) ? colunas[indice].trim() : '';
+            });
 
-            Object.values(colunaMap).forEach(nomeColunaTabela => {
-                const nomeColunaCSV = Object.keys(colunaMap).find(key => colunaMap[key] === nomeColunaTabela);
-                const indice = cabecalho.findIndex(h => h.toLowerCase() === nomeColunaCSV.toLowerCase());
-                let valor = (indice !== -1 && colunas[indice]) ? colunas[indice].replace(/"/g, '').trim() : '';
-                if (nomeColunaCSV === 'Cliente') {
-                    const palavras = valor.split(' ');
-                    if (palavras.length > 2) {
-                        valor = `${palavras[0]} ${palavras[1]}`;
-                    }
-                }
+            // CHAVE DE IDENTIFICAÇÃO CORRIGIDA: Usa apenas Placa e Cliente para encontrar dados antigos.
+            let clienteEncurtado = dataForCells['Cliente'].split(' ').slice(0, 2).join(' ');
+            const chave = `${dataForCells['Placa']}-${clienteEncurtado}`;
+            const dadosSalvos = estadoAnterior[chave] || {};
+
+            colunasDesejadas.forEach(nomeColuna => {
                 const cell = document.createElement('td');
+                let valor = dataForCells[nomeColuna];
+                if (nomeColuna === 'Cliente') {
+                    valor = clienteEncurtado;
+                }
                 cell.textContent = valor;
                 row.appendChild(cell);
             });
 
             row.innerHTML += `
-                <td><select class="form-select form-select-sm">${conferentesOptionsHTML}</select></td>
-                <td><select class="form-select form-select-sm">${docasOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm" data-field="conferente">${conferentesOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm" data-field="doca">${docasOptionsHTML}</select></td>
                 <td><input type="time" class="form-control form-control-sm" data-field="inicio"></td>
                 <td><input type="time" class="form-control form-control-sm" data-field="fim"></td>
                 <td><div class="status-circle-table"></div></td>
-                <td><select class="form-select form-select-sm">${observacoesOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm" data-field="obs">${observacoesOptionsHTML}</select></td>
             `;
+            
+            row.querySelector('select[data-field="conferente"]').value = dadosSalvos.conferente || 'Selecione...';
+            row.querySelector('select[data-field="doca"]').value = dadosSalvos.doca || 'Selecione...';
+            row.querySelector('input[data-field="inicio"]').value = dadosSalvos.inicio || '';
+            row.querySelector('input[data-field="fim"]').value = dadosSalvos.fim || '';
+            row.querySelector('select[data-field="obs"]').value = dadosSalvos.obs || 'Selecione...';
+            
             tabelaCorpo.appendChild(row);
             
-            const placa = row.cells[2].textContent;
-            const cliente = row.cells[3].textContent;
-            const volumes = row.cells[4].textContent;
-            const carretaNaDoca = row.cells[1].textContent;
             const statusCircle = row.querySelector('.status-circle-table');
-            atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, '', '', statusCircle);
+            atualizarStatusCor(dataForCells['Placa'], clienteEncurtado, dataForCells['Volume'], dataForCells['Carreta na Doca'], dadosSalvos.inicio || '', dadosSalvos.fim || '', statusCircle);
         });
     }
 
@@ -368,12 +375,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             row.innerHTML += `
-                <td><select class="form-select form-select-sm">${conferentesOptionsHTML}</select></td>
-                <td><select class="form-select form-select-sm">${docasOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm" data-field="conferente">${conferentesOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm" data-field="doca">${docasOptionsHTML}</select></td>
                 <td><input type="time" class="form-control form-control-sm" data-field="inicio" value="${rowData[7] || ''}"></td>
                 <td><input type="time" class="form-control form-control-sm" data-field="fim" value="${rowData[8] || ''}"></td>
                 <td><div class="status-circle-table"></div></td>
-                <td><select class="form-select form-select-sm">${observacoesOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm" data-field="obs">${observacoesOptionsHTML}</select></td>
             `;
 
             const selects = row.querySelectorAll('select');
