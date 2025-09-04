@@ -5,29 +5,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const pasteData = document.getElementById('pasteData');
     const pasteBtn = document.getElementById('pasteBtn');
     const saveBtn = document.getElementById('saveBtn');
-    const resetBtn = document.getElementById('resetBtn'); // Botão de reset
     const tabelaCorpo = document.querySelector('#painelTable tbody');
 
-    // --- CONFIGURAÇÃO DOS MODAIS ---
-    const alertModalEl = document.getElementById('alertModal');
-    const alertModal = new bootstrap.Modal(alertModalEl);
+    // Instancia o Modal do Bootstrap
+    const modalElement = document.getElementById('alertModal');
+    const alertModal = new bootstrap.Modal(modalElement);
 
-    const resetModalEl = document.getElementById('resetConfirmModal');
-    const resetModal = new bootstrap.Modal(resetModalEl);
-    const confirmResetBtn = document.getElementById('confirmResetBtn');
-
-
-    // Listener para o modal de alerta (garante a limpeza do backdrop)
-    alertModalEl.addEventListener('hidden.bs.modal', () => {
+    // Listener para garantir que o backdrop seja removido ao fechar o modal
+    modalElement.addEventListener('hidden.bs.modal', () => {
         const backdrops = document.querySelectorAll('.modal-backdrop');
         backdrops.forEach(backdrop => backdrop.remove());
         document.body.style.overflow = 'auto';
     });
 
-
     // Chave para usar no localStorage
     const localStorageKey = 'painelGestaoDados';
     let unsavedChanges = false;
+
+    // --- LISTAS PARA OS SELECTS ---
+    const listaDeConferentes = [
+        'Selecione...', 'ALMREP', 'ARIONALDO', 'ARLLYSON', 'CÍCERO', 'ERISOM',
+        'ERNANDES', 'FABIANO', 'FÁBIO', 'FRANCIE', 'ISMAEL', 'JOEL',
+        'MICIANO', 'TIAGO', 'WENDEL'
+    ].sort((a, b) => {
+        if (a === 'Selecione...') return -1;
+        if (b === 'Selecione...') return 1;
+        return a.localeCompare(b);
+    });
+    const listaDeDocas = ['Selecione...', 'DOCA1', 'DOCA2', 'DOCA3', 'DOCA4', 'DOCA5', 'DOCA6', 'DOCA7', 'DOCA8', 'DOCA9', 'DOCA10'];
+    const listaDeObservacoes = [
+        'Selecione...', 'ABSENTEÍSMO CAPATAZIA', 'ABSENTEÍSMO ESMALTEC', 'AGUARDANDO COMPLEMENTO DE CARGA',
+        'ANTECIPADO', 'APA EM FALHAS CONSTANTES', 'APA EM MANUTENÇÃO', 'ATRASO - COMERCIAL DIURNO',
+        'ATRASO - COMERCIAL NOTURNO', 'ATRASO - PROGRAMAÇÃO LOGÍSTICA', 'ATRASO - QUEDA DE CONTENTOR NO APA',
+        'ATRASO - VEÍCULO NÃO SE APRESENTOU', 'ATRASO - WMS SEM CONEXÃO COM A REDE', 'CARREGAMENTO NO APA2',
+        'DESISTÊNCIA DO MOTORISTA', 'FALHA OPERACIONAL DA EXPEDIÇÃO', 'LOGÍSTICA REVERSA',
+        'PEDIDO POSTERGADO PELO CLIENTE', 'PRODUTOS EM PRODUÇÃO', 'PRODUTOS MOLHADOS',
+        'RECUSADO - VEÍCULO COM INFILTRAÇÃO', 'RECUSADO - VEÍCULO INADEQUADO', 'RECUSADO - VEÍCULO NÃO COUBE A CARGA',
+        'SEM OS ITENS BÁSICOS PARA CARREGAMENTO', 'SEM PROGRAMAÇÃO', 'TREINAMENTO COLABORADORES NOVO WMS'
+    ].sort((a, b) => {
+        if (a === 'Selecione...') return -1;
+        if (b === 'Selecione...') return 1;
+        return a.localeCompare(b);
+    });
 
     // Mapeamento das colunas
     const colunaMap = {
@@ -42,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
 
     // --- EVENT LISTENERS ---
-
     importarBtn.addEventListener('click', () => {
         const file = fileInput.files[0];
         if (file) {
@@ -65,29 +83,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveBtn.addEventListener('click', saveData);
 
-    // Abre o modal de confirmação ao clicar no botão de reset
-    resetBtn.addEventListener('click', () => {
-        resetModal.show();
+    tabelaCorpo.addEventListener('change', (e) => {
+        const target = e.target;
+        const targetRow = target.closest('tr');
+        if (!targetRow) return;
+
+        if (target.tagName === 'SELECT') {
+            const cellIndex = target.closest('td').cellIndex;
+            if (cellIndex === 5 || cellIndex === 6 || cellIndex === 10) {
+                 if (target.value !== 'Selecione...') {
+                    unsavedChanges = true;
+                    showBootstrapAlert('Alteração detectada. Não se esqueça de salvar.', 'Alteração Detectada', 'warning');
+                }
+            }
+        }
+        
+        if (target.matches('input[type="time"]')) {
+            const placa = targetRow.cells[2].textContent;
+            const cliente = targetRow.cells[3].textContent;
+            const volumes = targetRow.cells[4].textContent;
+            const carretaNaDoca = targetRow.cells[1].textContent;
+            const inicio = targetRow.querySelector('input[data-field="inicio"]').value;
+            const fim = targetRow.querySelector('input[data-field="fim"]').value;
+            const statusCircle = targetRow.querySelector('.status-circle-table');
+            
+            atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, statusCircle);
+            unsavedChanges = true;
+        }
     });
-
-    // Executa a limpeza ao confirmar no modal
-    confirmResetBtn.addEventListener('click', () => {
-        // Limpa a tabela na tela
-        tabelaCorpo.innerHTML = '';
-
-        // Limpa os dados salvos no navegador
-        localStorage.removeItem(localStorageKey);
-
-        // Reseta o controle de alterações não salvas
-        unsavedChanges = false;
-
-        // Esconde o modal de confirmação
-        resetModal.hide();
-
-        // Informa o usuário que a operação foi um sucesso
-        showBootstrapAlert('Todos os dados foram apagados com sucesso.', 'Tabela Limpa', 'success');
-    });
-
 
     window.addEventListener('beforeunload', (e) => {
         if (unsavedChanges) {
@@ -96,42 +119,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-    // --- FUNÇÕES PRINCIPAIS ---
+    // --- FUNÇÕES ---
 
     /**
-     * Exibe um modal de alerta customizado do Bootstrap.
-     * @param {string} message - A mensagem a ser exibida.
-     * @param {string} title - O título do modal.
-     * @param {string} type - 'success', 'warning', ou 'danger' para colorir o cabeçalho.
+     * FUNÇÃO REESCRITA: Atualiza a cor do círculo de status com base nas novas regras.
      */
+    function atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, statusCircle) {
+        statusCircle.className = 'status-circle-table';
+
+        if (!placa && !cliente && !volumes) {
+            statusCircle.classList.add('status-black');
+            return;
+        }
+
+        if (!carretaNaDoca || !carretaNaDoca.includes(':')) {
+            statusCircle.classList.add('status-white');
+            return;
+        }
+
+        const dataBase = new Date('1970-01-01');
+        const docaTime = new Date(`${dataBase.toDateString()} ${carretaNaDoca}`);
+
+        // Lógica para carregamento FINALIZADO (ambos os campos preenchidos)
+        if (inicio && fim) {
+            let fimTime = new Date(`${dataBase.toDateString()} ${fim}`);
+            // Corrige se o fim for no dia seguinte
+            if (fimTime < docaTime) {
+                fimTime.setDate(fimTime.getDate() + 1);
+            }
+            const duracaoMinutos = (fimTime - docaTime) / 60000;
+
+            if (duracaoMinutos <= 60) {
+                statusCircle.classList.add('status-blue'); // Finalizado no prazo (<= 1h da DOCA)
+            } else {
+                statusCircle.classList.add('status-red'); // Finalizado com atraso (> 1h da DOCA)
+            }
+        }
+        // Lógica para carregamento EM ANDAMENTO (apenas início preenchido)
+        else if (inicio) {
+            const inicioTime = new Date(`${dataBase.toDateString()} ${inicio}`);
+            if (inicioTime > docaTime) {
+                statusCircle.classList.add('status-yellow'); // Em andamento, iniciou com atraso
+            } else {
+                statusCircle.classList.add('status-green'); // Em andamento, iniciou no prazo
+            }
+        }
+        // Carregamento AGUARDANDO
+        else {
+            statusCircle.classList.add('status-white');
+        }
+    }
+
     function showBootstrapAlert(message, title = 'Aviso do Painel', type = 'primary') {
         const modalTitle = document.getElementById('alertModalLabel');
         const modalBody = document.getElementById('alertModalBody');
         const modalHeader = document.getElementById('alertModalHeader');
-
         modalTitle.textContent = title;
         modalBody.textContent = message;
-
         modalHeader.className = 'modal-header';
-        if (type === 'success') {
-            modalHeader.classList.add('bg-success', 'text-white');
-        } else if (type === 'warning') {
-            modalHeader.classList.add('bg-warning', 'text-dark');
-        } else if (type === 'danger') {
-            modalHeader.classList.add('bg-danger', 'text-white');
-        } else if (type === 'info') {
-             modalHeader.classList.add('bg-info', 'text-white');
-        }
-
+        if (type === 'success') modalHeader.classList.add('bg-success', 'text-white');
+        else if (type === 'warning') modalHeader.classList.add('bg-warning', 'text-dark');
+        else if (type === 'danger') modalHeader.classList.add('bg-danger', 'text-white');
+        else if (type === 'info') modalHeader.classList.add('bg-info', 'text-white');
         alertModal.show();
     }
 
-
-    /**
-     * Processa os dados brutos (de arquivo ou colados) e renderiza a tabela.
-     * @param {string} rawData
-     */
     function processRawData(rawData) {
         try {
             const { cabecalho, dados } = parseData(rawData);
@@ -144,34 +196,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Salva o conteúdo atual da tabela no localStorage.
-     */
     function saveData() {
         const tableData = [];
         const tableRows = tabelaCorpo.querySelectorAll('tr');
-
         tableRows.forEach(row => {
             const rowData = [];
             row.querySelectorAll('td').forEach(cell => {
                 const input = cell.querySelector('input, select');
-                if (input) {
-                    rowData.push(input.value);
-                } else {
-                    rowData.push(cell.textContent);
-                }
+                if (input) rowData.push(input.value);
+                else rowData.push(cell.textContent);
             });
             tableData.push(rowData);
         });
-
         localStorage.setItem(localStorageKey, JSON.stringify(tableData));
         unsavedChanges = false;
         showBootstrapAlert('Seus dados foram salvos com sucesso no navegador!', 'Dados Salvos', 'success');
     }
 
-    /**
-     * Carrega os dados do localStorage ao iniciar a página.
-     */
     function loadData() {
         const savedData = localStorage.getItem(localStorageKey);
         if (savedData) {
@@ -180,20 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Analisa os dados brutos para extrair cabeçalho e linhas.
-     * @param {string} rawData
-     * @returns {{cabecalho: string[], dados: string[]}}
-     */
     function parseData(rawData) {
         const linhas = rawData.trim().replace(/\r/g, '').split('\n');
         if (linhas.length < 1) throw new Error("Dados inválidos.");
-
         let cabecalho, dados;
         const headerIndex = linhas.findIndex(linha =>
             parseCsvLine(linha).some(c => c.toLowerCase().includes('janela') || c.toLowerCase().includes('placa'))
         );
-
         if (headerIndex !== -1) {
             cabecalho = parseCsvLine(linhas[headerIndex]);
             dados = linhas.slice(headerIndex + 1);
@@ -204,17 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return { cabecalho, dados };
     }
 
-    /**
-     * Analisa uma linha de texto delimitado.
-     * @param {string} line
-     * @returns {string[]}
-     */
     function parseCsvLine(line) {
         const result = [];
         let inQuotes = false;
         let currentField = '';
         const delimiter = line.includes('\t') ? '\t' : (line.includes(';') ? ';' : ',');
-
         for (let i = 0; i < line.length; i++) {
             const char = line[i];
             const nextChar = line[i + 1];
@@ -234,21 +262,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return result.map(field => field.replace(/^"|"$/g, ''));
     }
 
-    /**
-     * Renderiza a tabela a partir de dados importados (CSV ou colados).
-     * @param {string[]} dados
-     * @param {string[]} cabecalho
-     */
     function renderizarTabela(dados, cabecalho) {
         tabelaCorpo.innerHTML = '';
         if (dados.length === 0 || (dados.length === 1 && dados[0].trim() === '')) return;
+
+        const conferentesOptionsHTML = listaDeConferentes.map(nome => `<option value="${nome}">${nome}</option>`).join('');
+        const docasOptionsHTML = listaDeDocas.map(doca => `<option value="${doca}">${doca}</option>`).join('');
+        const observacoesOptionsHTML = listaDeObservacoes.map(obs => `<option value="${obs}">${obs}</option>`).join('');
 
         dados.forEach(linha => {
             if (!linha.trim()) return;
             const colunas = parseCsvLine(linha);
             if (colunas.length <= 1) return;
-
             const row = document.createElement('tr');
+
+            const indiceCarretaNaDoca = cabecalho.findIndex(h => h.toLowerCase() === 'carreta na doca');
+            const horaTexto = colunas[indiceCarretaNaDoca] || '';
+            if (horaTexto.includes(':')) {
+                const hora = parseInt(horaTexto.split(':')[0], 10);
+                if ((hora >= 20 && hora <= 23) || (hora >= 0 && hora <= 4)) row.classList.add('turno-noturno');
+                else if (hora >= 8 && hora <= 16) row.classList.add('turno-diurno');
+            }
+
             Object.values(colunaMap).forEach(nomeColunaTabela => {
                 const nomeColunaCSV = Object.keys(colunaMap).find(key => colunaMap[key] === nomeColunaTabela);
                 const indice = cabecalho.findIndex(h => h.toLowerCase() === nomeColunaCSV.toLowerCase());
@@ -259,23 +294,66 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             row.innerHTML += `
-                <td><select class="form-select form-select-sm"><option>Selecione...</option></select></td>
-                <td><select class="form-select form-select-sm"><option>Selecione...</option></select></td>
-                <td><input type="time" class="form-control form-control-sm"></td>
-                <td><input type="time" class="form-control form-control-sm"></td>
-                <td><div class="status-circle"></div></td>
-                <td><select class="form-select form-select-sm"><option>Selecione...</option></select></td>
+                <td><select class="form-select form-select-sm">${conferentesOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm">${docasOptionsHTML}</select></td>
+                <td><input type="time" class="form-control form-control-sm" data-field="inicio"></td>
+                <td><input type="time" class="form-control form-control-sm" data-field="fim"></td>
+                <td><div class="status-circle-table"></div></td>
+                <td><select class="form-select form-select-sm">${observacoesOptionsHTML}</select></td>
             `;
             tabelaCorpo.appendChild(row);
+            
+            const placa = row.cells[2].textContent;
+            const cliente = row.cells[3].textContent;
+            const volumes = row.cells[4].textContent;
+            const carretaNaDoca = row.cells[1].textContent;
+            const statusCircle = row.querySelector('.status-circle-table');
+            atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, '', '', statusCircle);
         });
     }
 
-    /**
-     * Renderiza a tabela a partir de dados já salvos no localStorage.
-     * @param {Array<Array<string>>} tableData
-     */
     function renderizarTabelaFromSavedData(tableData) {
         tabelaCorpo.innerHTML = '';
+        const conferentesOptionsHTML = listaDeConferentes.map(nome => `<option value="${nome}">${nome}</option>`).join('');
+        const docasOptionsHTML = listaDeDocas.map(doca => `<option value="${doca}">${doca}</option>`).join('');
+        const observacoesOptionsHTML = listaDeObservacoes.map(obs => `<option value="${obs}">${obs}</option>`).join('');
+
         tableData.forEach(rowData => {
             const row = document.createElement('tr');
-for (let i = 0; i < 5; i++)
+            const horaTexto = rowData[1] || '';
+            if (horaTexto.includes(':')) {
+                const hora = parseInt(horaTexto.split(':')[0], 10);
+                if ((hora >= 20 && hora <= 23) || (hora >= 0 && hora <= 4)) row.classList.add('turno-noturno');
+                else if (hora >= 8 && hora <= 16) row.classList.add('turno-diurno');
+            }
+            for (let i = 0; i < 5; i++) {
+                const cell = document.createElement('td');
+                cell.textContent = rowData[i] || '';
+                row.appendChild(cell);
+            }
+            row.innerHTML += `
+                <td><select class="form-select form-select-sm">${conferentesOptionsHTML}</select></td>
+                <td><select class="form-select form-select-sm">${docasOptionsHTML}</select></td>
+                <td><input type="time" class="form-control form-control-sm" data-field="inicio" value="${rowData[7] || ''}"></td>
+                <td><input type="time" class="form-control form-control-sm" data-field="fim" value="${rowData[8] || ''}"></td>
+                <td><div class="status-circle-table"></div></td>
+                <td><select class="form-select form-select-sm">${observacoesOptionsHTML}</select></td>
+            `;
+
+            const selects = row.querySelectorAll('select');
+            selects[0].value = rowData[5] || 'Selecione...';
+            selects[1].value = rowData[6] || 'Selecione...';
+            selects[2].value = rowData[10] || 'Selecione...';
+            tabelaCorpo.appendChild(row);
+
+            const placa = row.cells[2].textContent;
+            const cliente = row.cells[3].textContent;
+            const volumes = row.cells[4].textContent;
+            const carretaNaDoca = row.cells[1].textContent;
+            const inicio = row.querySelector('input[data-field="inicio"]').value;
+            const fim = row.querySelector('input[data-field="fim"]').value;
+            const statusCircle = row.querySelector('.status-circle-table');
+            atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, statusCircle);
+        });
+    }
+});

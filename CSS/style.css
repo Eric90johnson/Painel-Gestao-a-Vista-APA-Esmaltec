@@ -30,14 +30,12 @@ header > div {
     flex-grow: 1;
     justify-content: space-between;
     align-items: center;
-    /* Remova o padding-left daqui para a logo colar na borda */
-    padding-right: 20px; /* Mantém o espaçamento à direita se necessário */
+    padding-right: 20px;
 }
 
 .header-logo {
     height: 60px;
     object-fit: contain;
-    /* Remova o padding-left daqui também */
     margin: 0;
     padding: 0;
 }
@@ -58,26 +56,24 @@ header > div {
 /*botões de salvar e limpar*/
 
 #saveBtn .fas.fa-save {
-    color: #0C296C; /* Cor azul do cabeçalho para o ícone de disquete */
+    color: #0C296C;
 }
 
-/* Opcional: Se você quiser que o botão de salvar seja transparente */
 #saveBtn {
     background-color: transparent;
-    border: 1px solid #0C296C; /* Borda azul para o botão */
+    border: 1px solid #0C296C;
 }
 #saveBtn:hover {
     background-color: #0C296C;
-    color: white; /* Cor do texto/ícone branca no hover */
+    color: white;
 }
 #saveBtn:hover .fas.fa-save {
-    color: white; /* Garante que o ícone fique branco no hover */
+    color: white;
 }
 
 
 /*tabela e aside*/
 
-/* Estilo para as caixas de conteúdo */
 .table-container,
 .aside-container {
     background-color: white;
@@ -89,11 +85,10 @@ header > div {
 
 .main-content {
     display: flex;
-    padding: 10px 10px; /* Adiciona o espaçamento lateral */
-    gap: 10px; /* Adiciona o espaçamento entre as caixas */
+    padding: 10px 10px;
+    gap: 10px;
 }
 
-/* Distribuição de largura das caixas */
 .table-container {
     flex-basis: 75%;
 }
@@ -106,62 +101,82 @@ header > div {
 /* tabela */
 
 #painelTable {
-    width: 100%; /* Garante que a tabela ocupe toda a largura do seu contêiner (75% da página) */
-    border-collapse: collapse; /* Remove o espaçamento entre as bordas das células */
-    table-layout: fixed; /* Garante que as colunas tenham a mesma largura */
+    width: 100%;
+    border-collapse: collapse;
+    /* table-layout: fixed; FOI REMOVIDO PARA PERMITIR LARGURAS VARIÁVEIS */
     font-size: 0.9em;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra sutil */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 #painelTable th,
 #painelTable td {
-    border: 1px solid #dee2e6; /* Borda leve para as células */
-    padding: 8px; /* Espaçamento interno para as células */
-    text-align: center; /* Centraliza o texto nas células */
-    overflow: hidden; /* Esconde qualquer conteúdo que exceda a célula */
-    white-space: nowrap; /* Impede a quebra de linha do texto */
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap; /* Impede que o texto quebre linha, mas 'text-overflow' cuida do excesso */
+    text-overflow: ellipsis; /* Adiciona "..." se o conteúdo for muito grande */
 }
 
+/* LARGURAS DAS COLUNAS AJUSTADAS */
+#painelTable th:nth-child(1), #painelTable td:nth-child(1) { width: 7%; }  /* JANELA */
+#painelTable th:nth-child(2), #painelTable td:nth-child(2) { width: 8%; }  /* CARRETA NA DOCA */
+#painelTable th:nth-child(3), #painelTable td:nth-child(3) { width: 8%; }  /* PLACA */
+#painelTable th:nth-child(4), #painelTable td:nth-child(4) { width: 10%; } /* CLIENTE - MAIOR */
+#painelTable th:nth-child(5), #painelTable td:nth-child(5) { width: 7%; }  /* VOLUMES */
+#painelTable th:nth-child(6), #painelTable td:nth-child(6) { width: 10%; } /* CONFERENTE */
+#painelTable th:nth-child(7), #painelTable td:nth-child(7) { width: 15%; }  /* DOCA */
+#painelTable th:nth-child(8), #painelTable td:nth-child(8) { width: 7%; }  /* INÍCIO */
+#painelTable th:nth-child(9), #painelTable td:nth-child(9) { width: 7%; }  /* FIM */
+#painelTable th:nth-child(10), #painelTable td:nth-child(10) { width: 5%; } /* STATUS */
+#painelTable th:nth-child(11), #painelTable td:nth-child(11) { width: 30%; }/* OBS - MAIOR */
+
+
 #painelTable thead {
-    background-color: #0C296C; /* Cor do cabeçalho da tabela */
-    color: white; /* Cor do texto no cabeçalho */
+    background-color: #0C296C;
+    color: white;
 }
 
 #painelTable thead th {
-    font-weight: bold; /* Deixa o texto do cabeçalho em negrito */
-    text-transform: uppercase; /* Transforma o texto em maiúsculo */
+    font-weight: bold;
+    text-transform: uppercase;
     padding: 10px 5px;
 }
 
-#painelTable tbody tr:nth-child(even) {
-    background-color: #f2f2f2; /* Cor de fundo para as linhas pares (listras) */
+
+/* NOVAS CLASSES PARA OS TURNOS */
+#painelTable tbody tr.turno-diurno {
+    background-color: #ffffff; /* Branco */
 }
 
+#painelTable tbody tr.turno-noturno {
+    background-color: #f2f2f2; /* Cinza claro */
+}
+
+/* Efeito hover para AMBOS os turnos */
 #painelTable tbody tr:hover {
-    background-color: #e9ecef; /* Cor de fundo quando o mouse passa por cima da linha */
+    background-color: #e9ecef !important; /* !important para garantir a sobreposição */
 }
-
 
 
 /* Layout da legenda */
 
 .summary-key {
-    display: flex; /* Transforma o contêiner em um Flexbox */
-    justify-content: space-between; /* Distribui as colunas com espaço entre elas */
-    gap: 20px; /* Adiciona um espaço entre as colunas */
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
 }
 
-/* Garante que o conteúdo de cada coluna fique em lista vertical */
 .status-column {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Adiciona espaçamento entre os itens de cada coluna */
+    gap: 10px;
 }
 
 .status-item {
     display: flex;
-    align-items: center; /* Alinha os itens verticalmente ao centro */
-    gap: 10px; /* Adiciona um pequeno espaço entre o círculo e o texto */
+    align-items: center;
+    gap: 10px;
 }
 
 
@@ -170,7 +185,7 @@ header > div {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    border: 1px solid #c2c0c0; /* Borda para o item "No Prazo" */
+    border: 1px solid #c2c0c0;
 }
 
 /* Cores dos status */
@@ -187,45 +202,78 @@ header > div {
 }
 
 .finalizado-horario {
-    background-color: #0C296C; /* O mesmo azul do seu header */
+    background-color: #0C296C;
 }
 
 .sem-informacoes {
     background-color: black;
 }
 
-
-
-************************************************
+/************************************************/
 /*botões rodapé*/
 
-/* Container para os botões do rodapé */
 .footer-buttons {
-    width: 100%; /* Garante que a div ocupe toda a largura */
-    display: flex; /* Habilita o Flexbox */
-    justify-content: center; /* Centraliza os botões */
-    align-items: center; /* Alinha os botões verticalmente */
-    margin: 20px 0; /* Adiciona margem superior e inferior */
-    flex-wrap: wrap; /* Garante a quebra de linha em telas pequenas */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
 }
 
-/* Adiciona um espaço para todos os botões exceto o último */
 .footer-buttons .btn-primary:not(:last-child) {
     margin-right: 25px;
 }
 
 .footer-buttons .btn-primary {
-    background-color: #0C296C; /* Cor de fundo azul do cabeçalho */
-    border-color: #0C296C; /* Cor da borda */
-    color: white; /* Cor do texto */
-    transition: all 0.2s ease-in-out; /* Adiciona uma transição suave */
-    transform: scale(1); /* Estado inicial da escala */
+    background-color: #0C296C;
+    border-color: #0C296C;
+    color: white;
+    transition: all 0.2s ease-in-out;
+    transform: scale(1);
 }
 
 .footer-buttons .btn-primary:hover,
-.footer-buttons .btn-primary:active { /* Adiciona o efeito também ao clicar (active) */
-    background-color: white; /* Fundo branco no hover */
-    border-color: #0C296C; /* Borda azul no hover */
-    color: #0C296C; /* Texto azul no hover */
-    transform: scale(1.10); /* Aumenta o tamanho em 15% (1 + 0.15) */
+.footer-buttons .btn-primary:active {
+    background-color: white;
+    border-color: #0C296C;
+    color: #0C296C;
+    transform: scale(1.10);
+}
+
+/* NOVAS CLASSES PARA O CÍRCULO DE STATUS NA TABELA */
+.status-circle-table {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #c2c0c0;
+    margin: 0 auto; /* Centraliza o círculo na célula */
+}
+
+.status-white {
+    background-color: white;
+}
+
+/* Cor para "Em andamento, no prazo" */
+.status-green {
+    background-color: #28a745; 
+}
+
+/* Cor para "Em andamento, com atraso" */
+.status-yellow {
+    background-color: #ffc107; 
+}
+
+/* Cor para "Finalizado com atraso" */
+.status-red {
+    background-color: #dc3545; 
+}
+
+/* NOVA COR: Cor para "Finalizado no prazo" */
+.status-blue {
+    background-color: #0d6efd; /* Azul do Bootstrap */
+}
+
+.status-black {
+    background-color: black;
 }

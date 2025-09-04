@@ -137,19 +137,17 @@
     <button id="exportExcelBtn" class="btn btn-primary">Exportar para Excel</button>
   </div>
 
-<div class="modal fade" id="resetConfirmModal" tabindex="-1" aria-labelledby="resetConfirmModalLabel" aria-hidden="true">
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title" id="resetConfirmModalLabel">Confirmar Exclusão</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header" id="alertModalHeader">
+          <h5 class="modal-title" id="alertModalLabel">Aviso do Painel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          Você tem certeza que deseja apagar todos os dados da tabela? Esta ação não pode ser desfeita.
-        </div>
+        <div class="modal-body" id="alertModalBody">
+          </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-danger" id="confirmResetBtn">Sim, Apagar Tudo</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
         </div>
       </div>
     </div>
