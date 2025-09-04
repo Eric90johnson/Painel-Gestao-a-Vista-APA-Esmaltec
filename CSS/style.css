@@ -77,11 +77,6 @@ header > div {
 
 /*tabela e aside*/
 
-{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 /* Estilo para as caixas de conteúdo */
 .table-container,
 .aside-container {
@@ -197,4 +192,40 @@ header > div {
 
 .sem-informacoes {
     background-color: black;
+}
+
+
+
+************************************************
+/*botões rodapé*/
+
+/* Container para os botões do rodapé */
+.footer-buttons {
+    width: 100%; /* Garante que a div ocupe toda a largura */
+    display: flex; /* Habilita o Flexbox */
+    justify-content: center; /* Centraliza os botões */
+    align-items: center; /* Alinha os botões verticalmente */
+    margin: 20px 0; /* Adiciona margem superior e inferior */
+    flex-wrap: wrap; /* Garante a quebra de linha em telas pequenas */
+}
+
+/* Adiciona um espaço para todos os botões exceto o último */
+.footer-buttons .btn-primary:not(:last-child) {
+    margin-right: 25px;
+}
+
+.footer-buttons .btn-primary {
+    background-color: #0C296C; /* Cor de fundo azul do cabeçalho */
+    border-color: #0C296C; /* Cor da borda */
+    color: white; /* Cor do texto */
+    transition: all 0.2s ease-in-out; /* Adiciona uma transição suave */
+    transform: scale(1); /* Estado inicial da escala */
+}
+
+.footer-buttons .btn-primary:hover,
+.footer-buttons .btn-primary:active { /* Adiciona o efeito também ao clicar (active) */
+    background-color: white; /* Fundo branco no hover */
+    border-color: #0C296C; /* Borda azul no hover */
+    color: #0C296C; /* Texto azul no hover */
+    transform: scale(1.10); /* Aumenta o tamanho em 15% (1 + 0.15) */
 }
