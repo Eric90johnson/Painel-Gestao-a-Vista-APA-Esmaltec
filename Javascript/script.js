@@ -48,13 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return a.localeCompare(b);
     });
 
-    // Ordem das colunas esperada se não houver um cabeçalho nos dados colados
     const cabecalhoPadrao = ['Janela', 'Local', 'Hora Prog. Distribuição', 'Carreta na Portaria', 'Entrada Portaria', 'Carreta na Doca', 'Data a Expedir', 'Transportador', 'Placa', 'PM', 'Remessa', 'Cliente', 'Destino', 'Agenda', 'Volume'];
-    
-    // Colunas que queremos extrair e exibir na tabela
     const colunasDesejadas = ['Janela', 'Carreta na Doca', 'Placa', 'Cliente', 'Volume'];
 
-    // --- CARREGAMENTO INICIAL ---
     loadData();
 
     // --- EVENT LISTENERS ---
@@ -85,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetRow = target.closest('tr');
         if (!targetRow) return;
 
-        // Coleta todos os dados da linha para usar nas funções
         const placa = targetRow.cells[2].textContent;
         const cliente = targetRow.cells[3].textContent;
         const volumes = targetRow.cells[4].textContent;
@@ -95,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const obs = targetRow.querySelector('select[data-field="obs"]').value;
         const statusCircle = targetRow.querySelector('.status-circle-table');
 
-        // Se a mudança foi em um select, alerta para salvar (e atualiza o estado)
         if (target.tagName === 'SELECT') {
             const cellIndex = target.closest('td').cellIndex;
             if (cellIndex === 5 || cellIndex === 6 || cellIndex === 10) {
@@ -104,21 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     showBootstrapAlert('Alteração detectada. Não se esqueça de salvar.', 'Alteração Detectada', 'warning');
                 }
             }
-            // Se a OBS foi alterada, precisa reavaliar o status e o bloqueio dos campos
             if (cellIndex === 10) {
                 gerenciarEstadoInputs(targetRow);
                 atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, obs, statusCircle);
             }
         }
         
-        // Se a mudança for nos inputs de tempo, atualiza o status e verifica alertas de atraso
         if (target.matches('input[type="time"]')) {
             atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, obs, statusCircle);
-            
             if (carretaNaDoca && carretaNaDoca.includes(':')) {
                 const dataBase = new Date('1970-01-01');
                 const docaTime = new Date(`${dataBase.toDateString()} ${carretaNaDoca}`);
-
                 if (target.dataset.field === 'inicio' && inicio) {
                     const inicioTime = new Date(`${dataBase.toDateString()} ${inicio}`);
                     if (inicioTime > docaTime) {
@@ -144,6 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
             e.returnValue = '';
         }
     });
+    
+    // --- NOVO EVENT LISTENER PARA O ATALHO CTRL+S ---
+    document.addEventListener('keydown', (e) => {
+        // Verifica se a tecla 's' (ou 'S') foi pressionada junto com a tecla Ctrl
+        if ((e.key === 's' || e.key === 'S') && e.ctrlKey) {
+            // Previne a ação padrão do navegador (que é salvar a página)
+            e.preventDefault();
+            // Chama a nossa função de salvar
+            saveData();
+        }
+    });
+
 
     // --- FUNÇÕES ---
 
@@ -155,39 +157,66 @@ document.addEventListener('DOMContentLoaded', () => {
         const conferente = row.querySelector('select[data-field="conferente"]').value;
         const doca = row.querySelector('select[data-field="doca"]').value;
         const inicio = row.querySelector('input[data-field="inicio"]').value;
-
         const isLinhaVazia = !placa && !cliente && !volumes;
         const isCarregamentoAtivo = conferente !== 'Selecione...' || doca !== 'Selecione...' || inicio !== '';
-        
         const deveTravar = isLinhaVazia || (obs !== 'Selecione...' && !isCarregamentoAtivo);
-        
         row.querySelector('select[data-field="conferente"]').disabled = deveTravar;
         row.querySelector('select[data-field="doca"]').disabled = deveTravar;
         row.querySelector('input[data-field="inicio"]').disabled = deveTravar;
         row.querySelector('input[data-field="fim"]').disabled = deveTravar;
+    }
+
+    function salvarEstadoAtualDaTabela() {
+        const estados = {
+            ativos: {},
+            bloqueados: {}
+        };
+        const rows = tabelaCorpo.querySelectorAll('tr');
+        rows.forEach(row => {
+            const placa = row.cells[2].textContent.trim();
+            const cliente = row.cells[3].textContent.trim();
+            const janela = row.cells[0].textContent.trim();
+            
+            const conferente = row.querySelector('select[data-field="conferente"]').value;
+            const doca = row.querySelector('select[data-field="doca"]').value;
+            const inicio = row.querySelector('input[data-field="inicio"]').value;
+            const obs = row.querySelector('select[data-field="obs"]').value;
+
+            if (placa && cliente) {
+                const chaveAtiva = `${placa}-${cliente}`;
+                const chaveBloqueada = `${placa}-${cliente}-${janela}`;
+                const isAtivo = conferente !== 'Selecione...' || doca !== 'Selecione...' || inicio !== '';
+
+                if (isAtivo) {
+                    estados.ativos[chaveAtiva] = {
+                        conferente, doca, inicio,
+                        fim: row.querySelector('input[data-field="fim"]').value,
+                        obs
+                    };
+                } else if (obs !== 'Selecione...') {
+                    estados.bloqueados[chaveBloqueada] = { obs };
+                }
+            }
+        });
+        return estados;
     }
     
     function atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, obs, statusCircle) {
         statusCircle.className = 'status-circle-table';
         const conferente = statusCircle.closest('tr').querySelector('select[data-field="conferente"]').value;
         const doca = statusCircle.closest('tr').querySelector('select[data-field="doca"]').value;
-
         const isLinhaVazia = !placa.trim() && !cliente.trim() && !volumes.trim();
         const isCarregamentoAtivo = conferente !== 'Selecione...' || doca !== 'Selecione...' || inicio !== '';
-
         if (isLinhaVazia || (obs !== 'Selecione...' && !isCarregamentoAtivo)) {
             statusCircle.classList.add('status-black');
             return;
         }
-
         if (!carretaNaDoca || !carretaNaDoca.includes(':')) {
             statusCircle.classList.add('status-white');
             return;
         }
-
         const dataBase = new Date('1970-01-01');
         const docaTime = new Date(`${dataBase.toDateString()} ${carretaNaDoca}`);
-        
         if (inicio && fim) {
             let fimTime = new Date(`${dataBase.toDateString()} ${fim}`);
             if (fimTime < docaTime) fimTime.setDate(fimTime.getDate() + 1);
@@ -218,12 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function processRawData(rawData) {
-        // Esta é a versão simplificada, sem a lógica de mover os dados
+        const estadoAnterior = salvarEstadoAtualDaTabela();
         try {
             const { cabecalho, dados } = parseData(rawData);
-            renderizarTabela(dados, cabecalho); // Não passa estado anterior
+            renderizarTabela(dados, cabecalho, estadoAnterior);
             unsavedChanges = true;
-            showBootstrapAlert('Dados atualizados! Lembre-se de salvar as alterações.', 'Atualização Concluída', 'info');
+            showBootstrapAlert('Dados atualizados! O estado anterior foi preservado. Lembre-se de salvar.', 'Atualização Concluída', 'info');
         } catch (error) {
             console.error('Erro ao processar dados:', error);
             showBootstrapAlert(`Erro ao processar os dados: ${error.message}`, 'Erro na Atualização', 'danger');
@@ -294,9 +323,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return result.map(field => field.replace(/^"|"$/g, ''));
     }
     
-    function renderizarTabela(dados, cabecalho) {
+    function renderizarTabela(dados, cabecalho, estadoAnterior = { ativos: {}, bloqueados: {} }) {
         tabelaCorpo.innerHTML = '';
         if (!dados || dados.length === 0) return;
+
+        const estadosAtivosParaAplicar = { ...(estadoAnterior.ativos || {}) };
+        const estadosBloqueados = { ...(estadoAnterior.bloqueados || {}) };
 
         const conferentesOptionsHTML = listaDeConferentes.map(nome => `<option value="${nome}">${nome}</option>`).join('');
         const docasOptionsHTML = listaDeDocas.map(doca => `<option value="${doca}">${doca}</option>`).join('');
@@ -322,14 +354,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 dataForCells[nomeColuna] = (indice !== -1 && colunas[indice]) ? colunas[indice].trim() : '';
             });
 
+            let clienteEncurtado = dataForCells['Cliente'].split(' ').slice(0, 2).join(' ');
+            const chaveAtiva = `${dataForCells['Placa']}-${clienteEncurtado}`;
+            const chaveBloqueada = `${dataForCells['Placa']}-${clienteEncurtado}-${dataForCells['Janela']}`;
+            
+            let dadosSalvos = {};
+
+            if (estadosAtivosParaAplicar[chaveAtiva]) {
+                dadosSalvos = estadosAtivosParaAplicar[chaveAtiva];
+                delete estadosAtivosParaAplicar[chaveAtiva];
+            } 
+            else if (estadosBloqueados[chaveBloqueada]) {
+                dadosSalvos = estadosBloqueados[chaveBloqueada];
+            }
+
             colunasDesejadas.forEach(nomeColuna => {
                 const cell = document.createElement('td');
                 let valor = dataForCells[nomeColuna];
                 if (nomeColuna === 'Cliente') {
-                    const palavras = valor.split(' ');
-                    if (palavras.length > 2) {
-                        valor = `${palavras[0]} ${palavras[1]}`;
-                    }
+                    valor = clienteEncurtado;
                 }
                 cell.textContent = valor;
                 row.appendChild(cell);
@@ -344,10 +387,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><select class="form-select form-select-sm" data-field="obs">${observacoesOptionsHTML}</select></td>
             `;
             
-            tabelaCorpo.appendChild(row);
+            row.querySelector('select[data-field="conferente"]').value = dadosSalvos.conferente || 'Selecione...';
+            row.querySelector('select[data-field="doca"]').value = dadosSalvos.doca || 'Selecione...';
+            row.querySelector('input[data-field="inicio"]').value = dadosSalvos.inicio || '';
+            row.querySelector('input[data-field="fim"]').value = dadosSalvos.fim || '';
+            row.querySelector('select[data-field="obs"]').value = dadosSalvos.obs || 'Selecione...';
             
+            tabelaCorpo.appendChild(row);
+        });
+
+        tabelaCorpo.querySelectorAll('tr').forEach(row => {
             gerenciarEstadoInputs(row);
-            atualizarStatusCor(row.cells[2].textContent, row.cells[3].textContent, row.cells[4].textContent, row.cells[1].textContent, '', '', 'Selecione...', row.querySelector('.status-circle-table'));
+            const placa = row.cells[2].textContent;
+            const cliente = row.cells[3].textContent;
+            const volumes = row.cells[4].textContent;
+            const carretaNaDoca = row.cells[1].textContent;
+            const inicio = row.querySelector('input[data-field="inicio"]').value;
+            const fim = row.querySelector('input[data-field="fim"]').value;
+            const obs = row.querySelector('select[data-field="obs"]').value;
+            const statusCircle = row.querySelector('.status-circle-table');
+            atualizarStatusCor(placa, cliente, volumes, carretaNaDoca, inicio, fim, obs, statusCircle);
         });
     }
     
