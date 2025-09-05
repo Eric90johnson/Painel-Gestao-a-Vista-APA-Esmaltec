@@ -284,3 +284,22 @@ header > div {
 .status-black {
     background-color: black;
 }
+
+
+/* NOVAS REGRAS PARA O MODO DE TELA CHEIA */
+
+/* Esconde a caixa de importação e os botões de ação */
+body.fullscreen-mode .import-box,
+body.fullscreen-mode .d-flex.justify-content-end {
+    display: none !important;
+}
+
+/* Garante que o espaçamento superior seja removido no modo de tela cheia */
+body.fullscreen-mode {
+    padding-top: 80px; /* Ajusta para a altura do cabeçalho */
+}
+
+/* Opcional: Aumenta a fonte da tabela em tela cheia para melhor visualização */
+body.fullscreen-mode #painelTable {
+    font-size: 0.9em;
+}

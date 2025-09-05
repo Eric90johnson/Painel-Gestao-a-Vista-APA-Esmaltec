@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pasteBtn = document.getElementById('pasteBtn');
     const saveBtn = document.getElementById('saveBtn');
     const tabelaCorpo = document.querySelector('#painelTable tbody');
+    const fullscreenBtn = document.getElementById('fullscreenBtn'); // NOVO: Seleciona o botão de tela cheia
 
     // Instancia o Modal do Bootstrap
     const modalElement = document.getElementById('alertModal');
@@ -75,6 +76,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveBtn.addEventListener('click', saveData);
+    
+    // --- NOVO EVENT LISTENER PARA O BOTÃO DE TELA CHEIA ---
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    });
+
+    // --- NOVO EVENT LISTENER PARA MUDANÇAS NO ESTADO DE TELA CHEIA ---
+    document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+            document.body.classList.add('fullscreen-mode');
+        } else {
+            document.body.classList.remove('fullscreen-mode');
+        }
+    });
+
 
     tabelaCorpo.addEventListener('change', (e) => {
         const target = e.target;
@@ -134,18 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
             e.returnValue = '';
         }
     });
-    
-    // --- NOVO EVENT LISTENER PARA O ATALHO CTRL+S ---
-    document.addEventListener('keydown', (e) => {
-        // Verifica se a tecla 's' (ou 'S') foi pressionada junto com a tecla Ctrl
-        if ((e.key === 's' || e.key === 'S') && e.ctrlKey) {
-            // Previne a ação padrão do navegador (que é salvar a página)
-            e.preventDefault();
-            // Chama a nossa função de salvar
-            saveData();
-        }
-    });
-
 
     // --- FUNÇÕES ---
 
@@ -354,25 +364,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 dataForCells[nomeColuna] = (indice !== -1 && colunas[indice]) ? colunas[indice].trim() : '';
             });
 
-            let clienteEncurtado = dataForCells['Cliente'].split(' ').slice(0, 2).join(' ');
-            const chaveAtiva = `${dataForCells['Placa']}-${clienteEncurtado}`;
-            const chaveBloqueada = `${dataForCells['Placa']}-${clienteEncurtado}-${dataForCells['Janela']}`;
-            
-            let dadosSalvos = {};
-
-            if (estadosAtivosParaAplicar[chaveAtiva]) {
-                dadosSalvos = estadosAtivosParaAplicar[chaveAtiva];
-                delete estadosAtivosParaAplicar[chaveAtiva];
-            } 
-            else if (estadosBloqueados[chaveBloqueada]) {
-                dadosSalvos = estadosBloqueados[chaveBloqueada];
-            }
-
             colunasDesejadas.forEach(nomeColuna => {
                 const cell = document.createElement('td');
                 let valor = dataForCells[nomeColuna];
                 if (nomeColuna === 'Cliente') {
-                    valor = clienteEncurtado;
+                    const palavras = valor.split(' ');
+                    if (palavras.length > 2) {
+                        valor = `${palavras[0]} ${palavras[1]}`;
+                    }
                 }
                 cell.textContent = valor;
                 row.appendChild(cell);
@@ -386,14 +385,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><div class="status-circle-table"></div></td>
                 <td><select class="form-select form-select-sm" data-field="obs">${observacoesOptionsHTML}</select></td>
             `;
+            tabelaCorpo.appendChild(row);
+        });
+
+        tabelaCorpo.querySelectorAll('tr').forEach(row => {
+            const placa = row.cells[2].textContent.trim();
+            const cliente = row.cells[3].textContent.trim();
+            const janela = row.cells[0].textContent.trim();
             
+            const chaveAtiva = `${placa}-${cliente}`;
+            const chaveBloqueada = `${placa}-${cliente}-${janela}`;
+            
+            let dadosSalvos = {};
+
+            if (estadosAtivosParaAplicar[chaveAtiva]) {
+                dadosSalvos = estadosAtivosParaAplicar[chaveAtiva];
+                delete estadosAtivosParaAplicar[chaveAtiva];
+            } 
+            else if (estadosBloqueados[chaveBloqueada]) {
+                dadosSalvos = estadosBloqueados[chaveBloqueada];
+            }
+
             row.querySelector('select[data-field="conferente"]').value = dadosSalvos.conferente || 'Selecione...';
             row.querySelector('select[data-field="doca"]').value = dadosSalvos.doca || 'Selecione...';
             row.querySelector('input[data-field="inicio"]').value = dadosSalvos.inicio || '';
             row.querySelector('input[data-field="fim"]').value = dadosSalvos.fim || '';
             row.querySelector('select[data-field="obs"]').value = dadosSalvos.obs || 'Selecione...';
-            
-            tabelaCorpo.appendChild(row);
         });
 
         tabelaCorpo.querySelectorAll('tr').forEach(row => {
